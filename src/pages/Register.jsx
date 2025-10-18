@@ -1,6 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import estateHubLogo from "../assets/estateHubLogoOscuro.png";
+import estateHubLogo from "../assets/estateHubLogoFullWhite.png";
+import Particles, { initParticlesEngine } from "@tsparticles/react";
+import { loadSlim } from "@tsparticles/slim";
+import { Eye, EyeClosed } from "lucide-react";
+
 
 const Register = ({ onToggleView }) => {
   const { register, loading } = useAuth();
@@ -12,6 +16,14 @@ const Register = ({ onToggleView }) => {
   });
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [engineReady, setEngineReady] = useState(false);
+
+  useEffect(() => {
+    initParticlesEngine(async (engine) => {
+      await loadSlim(engine);
+    }).then(() => setEngineReady(true));
+  }, []);
+
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -38,41 +50,58 @@ const Register = ({ onToggleView }) => {
 
   return (
     <div className="min-h-screen flex">
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
-        <div className="absolute inset-0 overflow-hidden opacity-20">
-          {[...Array(20)].map((_, i) => (
-            <div
-              key={i}
-              className="absolute text-white text-opacity-60 animate-float"
-              style={{
-                top: `${Math.random() * 100}%`,
-                left: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 8}s`,
-                animationDuration: `${10 + Math.random() * 10}s`,
-                transform: `scale(${0.6 + Math.random() * 0.8})`,
-              }}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path d="M13 11h8v2h-8v8h-2v-8H3v-2h8V3h2v8z" />
-              </svg>
-            </div>
-          ))}
-        </div>
-
-        <div className="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden min-h-screen bg-[#0e1036]">
+        {engineReady && (
+          <Particles
+            id="tsparticles"
+            className="absolute inset-0"
+            options={{
+              background: {
+                color: { value: "#0e1036" },
+              },
+              fullScreen: { enable: false },
+              fpsLimit: 60,
+              particles: {
+                number: {
+                  value: 70,
+                  density: { enable: true, area: 800 },
+                },
+                color: { value: ["#ffffff", "#60a5fa", "#93c5fd"] },
+                opacity: { value: 0.7 },
+                size: { value: { min: 1, max: 3 } },
+                move: {
+                  enable: true,
+                  speed: 0.6,
+                  direction: "none",
+                  random: true,
+                  straight: false,
+                  outModes: "out",
+                },
+                links: {
+                  enable: true,
+                },
+                shape: { type: "circle" },
+              },
+              interactivity: {
+                events: {
+                  onHover: { enable: true, mode: "repulse" },
+                  resize: true,
+                },
+                modes: {
+                  repulse: { distance: 100, duration: 0.3 },
+                },
+              },
+              detectRetina: true,
+            }}
+          />
+        )}
 
         <div className="relative z-10 flex flex-col justify-between p-12 text-white w-full">
           <div className="flex items-center mb-10">
             <img
               src={estateHubLogo}
               alt="EstateHubLogo"
-              className="w-48 drop-shadow-lg animate-fadeIn"
+              className="w-60 drop-shadow-lg animate-fadeIn"
             />
           </div>
 
@@ -106,13 +135,13 @@ const Register = ({ onToggleView }) => {
                       />
                     </svg>
                   </div>
-                  <span className="text-gray-200">{text}</span>
+                  <span className="text-gray-300">{text}</span>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="text-sm text-gray-400 mt-12">
+          <div className="text-sm text-gray-500 mt-12">
             © 2025 EstateHub. Todos los derechos reservados.
           </div>
         </div>
@@ -206,28 +235,11 @@ const Register = ({ onToggleView }) => {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute inset-y-0 right-0 pr-3 flex items-center"
                 >
-                  <svg
-                    className="h-5 w-5 text-gray-400 hover:text-gray-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    {showPassword ? (
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M13.875 18.825A10.05 10.05 0 0112 19"
-                      />
-                    ) : (
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M15 12a3 3 0 11-6 0"
-                      />
-                    )}
-                  </svg>
+                  {showPassword ? (
+                    <EyeClosed className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                  ) : (
+                    <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                  )}
                 </button>
               </div>
             </div>
