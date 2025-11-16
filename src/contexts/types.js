@@ -1,0 +1,1 @@
+export const POST_PROP = 'POST_PROP';
