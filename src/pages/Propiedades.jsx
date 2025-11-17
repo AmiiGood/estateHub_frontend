@@ -104,21 +104,32 @@ export const loaderPropiedades = async ({ request }) => {
   const storedUser = localStorage.getItem("user");
   const user = storedUser ? JSON.parse(storedUser) : null;
   const idUsuario = user?.usuario?.idUsuario;
+  const token = user?.token;
 
-  if (!idUsuario) {
+  if (!idUsuario || !token) {
     throw new Error("No hay usuario autenticado");
   }
 
   const url = new URL(request.url);
   const query = url.searchParams.get("search");
 
-  const res1 = await fetch(`${API}/getPropiedadesByUsuario/${idUsuario}`);
+  const headers = {
+    "Authorization": `Bearer ${token}`,
+  };
+
+
+  const res1 = await fetch(`${API}/getPropiedadesByUsuario/${idUsuario}`, {
+    headers,
+  });
   const data1 = await res1.json();
 
   let resultadoBusqueda = null;
 
+
   if (query) {
-    const res2 = await fetch(`${API}/getPropiedad?q=${query}`);
+    const res2 = await fetch(`${API}/getPropiedad?q=${query}`, {
+      headers,
+    });
     const data2 = await res2.json();
     resultadoBusqueda = data2.data;
   }
@@ -128,4 +139,5 @@ export const loaderPropiedades = async ({ request }) => {
     buscado: resultadoBusqueda || null,
   };
 };
+
 
