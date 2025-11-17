@@ -100,10 +100,19 @@ export default Propiedades;
 
 export const loaderPropiedades = async ({ request }) => {
   const API = `http://localhost:3000/api/propiedades`;
+
+  const storedUser = localStorage.getItem("user");
+  const user = storedUser ? JSON.parse(storedUser) : null;
+  const idUsuario = user?.usuario?.idUsuario;
+
+  if (!idUsuario) {
+    throw new Error("No hay usuario autenticado");
+  }
+
   const url = new URL(request.url);
   const query = url.searchParams.get("search");
 
-  const res1 = await fetch(`${API}/getPropiedadesByUsuario/${request.id}`);
+  const res1 = await fetch(`${API}/getPropiedadesByUsuario/${idUsuario}`);
   const data1 = await res1.json();
 
   let resultadoBusqueda = null;
@@ -119,3 +128,4 @@ export const loaderPropiedades = async ({ request }) => {
     buscado: resultadoBusqueda || null,
   };
 };
+

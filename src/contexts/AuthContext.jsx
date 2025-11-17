@@ -79,7 +79,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('user');
   };
 
-  // 👇 Función helper para obtener fácilmente el idUsuario
+
   const getIdUsuario = () => {
     return user?.usuario?.idUsuario;
   };
