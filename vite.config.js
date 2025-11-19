@@ -1,12 +1,3 @@
-<<<<<<< HEAD
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-
-// https://vite.dev/config/
-export default defineConfig({
-  plugins: [react()],
-})
-=======
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
@@ -496,4 +487,3 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
 });
->>>>>>> acca65288a2fc9d3e8df6bbb7266846e081e20e1
