@@ -1,8 +1,18 @@
+import { useAuth } from "../contexts/AuthContext";
 import React, { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { isAuthenticated, logout } = useAuth();
+  const isLogged = isAuthenticated();
+  const navigate = useNavigate();
+
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
 
   return (
     <nav className="bg-[#101828] shadow-lg border-b border-[#344054] sticky top-0 z-50">
@@ -79,6 +89,11 @@ const Navbar = () => {
             <button className="ml-4 px-4 py-2 bg-gradient-to-r from-[#D0D5DD] to-[#E4E7EC] text-[#101828] font-semibold rounded-lg hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5">
               Contactar
             </button>
+            {isLogged && (
+        <button className="w-full px-4 py-3 bg-gradient-to-r from-[#D0D5DD] to-[#E4E7EC] text-[#101828] font-semibold rounded-lg hover:shadow-lg transition-all duration-300" onClick={handleLogout}>
+          Logout
+        </button>
+        )}
           </div>
 
           {/* Botón menú móvil */}

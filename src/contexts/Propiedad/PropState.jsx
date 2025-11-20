@@ -13,9 +13,10 @@ const PropState = (propss) => {
 
     //Definimos el estado inicial
     const initialState = {
-        props: [],
-        selectedUser: null
-    }
+  props: [],
+  selectedProp: null
+};
+
 //x-api-key: reqres-free-v1
     //Definimos el useReducer para manejar el estado de la aplicación.
     const [state, dispatch] = useReducer(PropReducer, initialState);
@@ -23,19 +24,30 @@ const PropState = (propss) => {
     
     const postProp = async (propiedadData) => {
   try {
+    const storedUser = localStorage.getItem("user");
+    const userData = storedUser ? JSON.parse(storedUser) : null;
+    const token = userData?.token;
+
+    if (!token) {
+      console.error("No existe token en localStorage");
+      throw new Error("No autorizado");
+    }
+
     const res = await axios.post(
       "http://localhost:3000/api/propiedades/postPropiedad",
-      { propiedad: propiedadData }
+      { propiedad: propiedadData },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
     );
-
-    console.log("Respuesta completa del servidor:", res);
 
     dispatch({
       type: POST_PROP,
       payload: res.data.data,
     });
 
-    // Retornamos la respuesta completa para poder acceder a los datos
     return res;
   } catch (error) {
     console.error("Error al registrar propiedades:", error);
@@ -45,13 +57,15 @@ const PropState = (propss) => {
 
 
 
+
+
     
 
   return (
     <PropContext.Provider value={{
-        props: state.props,
-        selectedProp: state.selectedProp,
-        postProp
+    props: state.props,
+    selectedProp: state.selectedProp,
+    postProp
     }}>
         {propss.children}
     </PropContext.Provider>
