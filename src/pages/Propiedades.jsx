@@ -17,11 +17,13 @@ const Propiedades = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#101828] via-[#182230] to-[#0C111D] text-white">
       <div className="max-w-6xl mx-auto px-6 py-12">
-
         <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-10">
           <h1 className="text-3xl md:text-4xl font-bold">Propiedades</h1>
 
-          <form onSubmit={handleSearch} className="flex items-center w-full md:w-1/2">
+          <form
+            onSubmit={handleSearch}
+            className="flex items-center w-full md:w-1/2"
+          >
             <input
               type="text"
               placeholder="Buscar propiedad por título o ciudad..."
@@ -38,7 +40,6 @@ const Propiedades = () => {
           </form>
         </div>
 
-
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
           {propiedades?.length > 0 ? (
             propiedades.map((prop, index) => {
@@ -51,13 +52,11 @@ const Propiedades = () => {
                   key={index}
                   className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300"
                 >
-
                   <img
                     src={imagenPrincipal}
                     alt={prop.titulo}
                     className="w-full h-48 object-cover"
                   />
-
 
                   <div className="p-5 text-[#101828]">
                     <h3 className="text-xl font-semibold mb-2 truncate">
@@ -88,7 +87,6 @@ const Propiedades = () => {
           )}
         </div>
 
-
         <FormProp />
       </div>
     </div>
@@ -96,7 +94,6 @@ const Propiedades = () => {
 };
 
 export default Propiedades;
-
 
 export const loaderPropiedades = async ({ request }) => {
   const API = `http://localhost:3000/api/propiedades`;
@@ -114,9 +111,8 @@ export const loaderPropiedades = async ({ request }) => {
   const query = url.searchParams.get("search");
 
   const headers = {
-    "Authorization": `Bearer ${token}`,
+    Authorization: `Bearer ${token}`,
   };
-
 
   const res1 = await fetch(`${API}/getPropiedadesByUsuario/${idUsuario}`, {
     headers,
@@ -124,7 +120,6 @@ export const loaderPropiedades = async ({ request }) => {
   const data1 = await res1.json();
 
   let resultadoBusqueda = null;
-
 
   if (query) {
     const res2 = await fetch(`${API}/getPropiedad?q=${query}`, {
@@ -139,5 +134,3 @@ export const loaderPropiedades = async ({ request }) => {
     buscado: resultadoBusqueda || null,
   };
 };
-
-
