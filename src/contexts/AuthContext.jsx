@@ -79,6 +79,10 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('user');
   };
 
+  const isAuthenticated =() =>{
+    return localStorage.getItem('user') !== null;
+  }
+
 
   const getIdUsuario = () => {
     return user?.usuario?.idUsuario;
@@ -89,7 +93,8 @@ export const AuthProvider = ({ children }) => {
       user, 
       login, 
       register, 
-      logout, 
+      logout,
+      isAuthenticated, 
       loading,
       getIdUsuario 
     }}>

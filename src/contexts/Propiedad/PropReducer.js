@@ -9,8 +9,8 @@ export default (state, action) =>{
     switch (type){
         case POST_PROP:
             return{
-                ...state,
-                prop:payload
+                props: [...state.props, payload],
+                selectedProp: payload
             }
 
             default:

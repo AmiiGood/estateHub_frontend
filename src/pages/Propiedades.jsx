@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useLoaderData, useNavigate } from "react-router-dom";
+import { Link, useLoaderData, useNavigate } from "react-router-dom";
 import FormProp from "../components/FormProp";
 
 const Propiedades = () => {
@@ -45,7 +45,8 @@ const Propiedades = () => {
             propiedades.map((prop, index) => {
               const imagenPrincipal =
                 prop.imagenes?.[0]?.urlImagen ||
-                "https://via.placeholder.com/400x250?text=Sin+Imagen";
+                "https://placehold.co/400x250?text=Sin+Imagen";
+
 
               return (
                 <div
@@ -72,9 +73,13 @@ const Propiedades = () => {
                       <span className="text-lg font-bold text-[#182230]">
                         ${prop.precioVenta || prop.precioRenta || "0.00"}
                       </span>
-                      <button className="px-4 py-2 bg-[#182230] text-white rounded-lg text-sm hover:bg-[#101828] transition">
-                        Ver más
-                      </button>
+                      <Link 
+                          to={`/propiedad/${prop.idPropiedad}`} 
+                          className="px-4 py-2 bg-[#182230] text-white rounded-lg text-sm hover:bg-[#101828] transition"
+                        >
+                          Ver más
+                        </Link>
+                      <Link to={`/editarProp${prop.idPropiedad}`}>Edit</Link>
                     </div>
                   </div>
                 </div>

@@ -90,35 +90,46 @@ const FormProp = () => {
 
 
   const subirImagenes = async (propiedadId, archivos) => {
-    try {
-      const formData = new FormData();
-      
-      // Agregar cada imagen al FormData
-      archivos.forEach((archivo) => {
-        formData.append("fotos", archivo);
-      });
+  try {
+    const storedUser = localStorage.getItem("user");
+    const userData = storedUser ? JSON.parse(storedUser) : null;
+    const token = userData?.token;
 
-      const response = await fetch(
-        `http://localhost:3000/api/propiedades/subirFotos/${propiedadId}`,
-        {
-          method: "POST",
-          body: formData,
-          // No incluir Content-Type header, el navegador lo establecerá automáticamente con el boundary
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Error al subir imágenes");
-      }
-
-      const result = await response.json();
-      console.log("Imágenes subidas:", result);
-      return result;
-    } catch (error) {
-      console.error("Error al subir imágenes:", error);
-      throw error;
+    if (!token) {
+      throw new Error("No autorizado. Token no encontrado.");
     }
-  };
+
+    const formData = new FormData();
+
+    archivos.forEach((archivo) => {
+      formData.append("fotos", archivo);
+    });
+
+    const response = await fetch(
+      `http://localhost:3000/api/propiedades/subirFotos/${propiedadId}`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Error al subir imágenes");
+    }
+
+    const result = await response.json();
+    console.log("Imágenes subidas:", result);
+    return result;
+
+  } catch (error) {
+    console.error("Error al subir imágenes:", error);
+    throw error;
+  }
+};
+
 
   return (
     <section className="py-24 bg-gradient-to-br from-[#101828] via-[#182230] to-[#0C111D] text-white">

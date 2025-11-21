@@ -1,6 +1,13 @@
-import React from 'react'
+import React, { useState } from 'react'
+import { Link, useLoaderData, useNavigate } from "react-router-dom";
+
 
 const Home = () => {
+  const { participantes, buscado } = useLoaderData();
+  const navigate = useNavigate();
+  const [search, setSearch] = useState("");
+
+  const propiedades = buscado || participantes;
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
@@ -59,24 +66,57 @@ const Home = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {features.map((feature, index) => (
-              <div 
-                key={index}
-                className="group p-8 rounded-2xl border border-[#E4E7EC] hover:border-[#D0D5DD] hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2"
-              >
-                <div className="w-14 h-14 bg-gradient-to-br from-[#101828] to-[#182230] rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <span className="text-2xl">{feature.icon}</span>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+          {propiedades?.length > 0 ? (
+            propiedades.map((prop, index) => {
+              const imagenPrincipal =
+                prop.imagenes?.[0]?.urlImagen ||
+                "https://via.placeholder.com/400x250?text=Sin+Imagen";
+
+              return (
+                <div
+                  key={index}
+                  className="group p-8 rounded-2xl border border-[#E4E7EC] hover:border-[#D0D5DD] hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2"
+                >
+
+                  <img
+                    src={imagenPrincipal}
+                    alt={prop.titulo}
+                    className="w-full h-48 object-cover"
+                  />
+
+
+                  <div className="p-5 text-[#101828]">
+                    <h3 className="text-xl font-semibold mb-2 truncate">
+                      {prop.titulo}
+                    </h3>
+                    <p className="text-sm text-gray-600 mb-2 truncate">
+                      {prop.ciudad || "Ubicación no disponible"}
+                    </p>
+                    <p className="text-sm text-gray-500 mb-4 line-clamp-2">
+                      {prop.descripcion || "Sin descripción."}
+                    </p>
+                    <div className="flex justify-between items-center">
+                      <span className="text-lg font-bold text-[#182230]">
+                        ${prop.precioVenta || prop.precioRenta || "0.00"}
+                      </span>
+                      <Link 
+                        to={`/propiedad/${prop.idPropiedad}`} 
+                        className="px-4 py-2 bg-[#182230] text-white rounded-lg text-sm hover:bg-[#101828] transition"
+                      >
+                        Ver más
+                      </Link>
+                    </div>
+                  </div>
                 </div>
-                <h3 className="text-2xl font-bold text-[#101828] mb-4">
-                  {feature.title}
-                </h3>
-                <p className="text-[#475467] leading-relaxed">
-                  {feature.description}
-                </p>
-              </div>
-            ))}
-          </div>
+              );
+            })
+          ) : (
+            <p className="text-gray-400 text-center col-span-full">
+              No se encontraron propiedades.
+            </p>
+          )}
+        </div>
         </div>
       </section>
 
@@ -125,39 +165,6 @@ const Home = () => {
 }
 
 
-// Data
-const features = [
-  {
-    icon: "",
-    title: "Búsqueda Inteligente",
-    description: "Algoritmos avanzados que aprenden de tus preferencias para mostrarte solo las propiedades que realmente te interesan."
-  },
-  {
-    icon: "",
-    title: "Experiencia Mobile",
-    description: "Diseño responsive optimizado para que puedas buscar propiedades desde cualquier dispositivo sin comprometer la experiencia."
-  },
-  {
-    icon: "",
-    title: "Filtros Avanzados",
-    description: "Más de 50 criterios de búsqueda para encontrar exactamente lo que buscas en el lugar perfecto."
-  },
-  {
-    icon: "",
-    title: "Actualizaciones en Tiempo Real",
-    description: "Recibe notificaciones instantáneas cuando nuevas propiedades que coinciden con tu búsqueda estén disponibles."
-  },
-  {
-    icon: "",
-    title: "Análisis de Mercado",
-    description: "Datos y tendencias del mercado inmobiliario para ayudarte a tomar la mejor decisión de inversión."
-  },
-  {
-    icon: "",
-    title: "Asesoría Personalizada",
-    description: "Conectamos directamente con los mejores agentes inmobiliarios especializados en tu tipo de propiedad deseada."
-  }
-];
 
 const stats = [
   {
@@ -179,3 +186,47 @@ const stats = [
 ];
 
 export default Home
+
+export const loaderPropiedades = async ({ request }) => {
+  const API = `http://localhost:3000/api/propiedades`;
+
+  const storedUser = localStorage.getItem("user");
+  const user = storedUser ? JSON.parse(storedUser) : null;
+  const idUsuario = user?.usuario?.idUsuario;
+  const token = user?.token;
+
+  if (!idUsuario || !token) {
+    throw new Error("No hay usuario autenticado");
+  }
+
+  const url = new URL(request.url);
+  const query = url.searchParams.get("search");
+
+  const headers = {
+    "Authorization": `Bearer ${token}`,
+  };
+
+
+  const res1 = await fetch(`${API}/getPropiedadesByUsuario/${idUsuario}`, {
+    headers,
+  });
+  const data1 = await res1.json();
+
+  let resultadoBusqueda = null;
+
+
+  if (query) {
+    const res2 = await fetch(`${API}/getPropiedad?q=${query}`, {
+      headers,
+    });
+    const data2 = await res2.json();
+    resultadoBusqueda = data2.data;
+  }
+
+  return {
+    participantes: data1.data || [],
+    buscado: resultadoBusqueda || null,
+  };
+};
+
+

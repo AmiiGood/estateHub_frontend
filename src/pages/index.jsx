@@ -1,10 +1,11 @@
 import { createBrowserRouter } from "react-router-dom";
 
 import LayoutPublic from "../layout/LayoutPublic";
-import Login from "./Login";
-import Register from "./Register"
+
 import Home from "./Home";
 import Propiedades, { loaderPropiedades } from "./Propiedades";
+import Propiedad, { loaderPropiedad } from "./Propiedad";
+import AuthPage from "./AuthPage";
 
 
 //Creamos el router y su configuración básica
@@ -17,20 +18,22 @@ export const router = createBrowserRouter([
     {
         path: "/",
         index: true,
-        element: <Login/>,
-    },
-    {
-        path: "/Register",
-        element: <Register/>,
+        element: <AuthPage/>,
     },
     {
         path:"/Home",
         element:<Home/>,
+        loader: loaderPropiedades,
     },
     {
         path:"/Propiedades",
         element:<Propiedades/>,
         loader: loaderPropiedades,
+    },
+    {
+        path: "/Propiedad/:id",
+        element: <Propiedad/>,
+        loader: loaderPropiedad,
     }
     
 ]
