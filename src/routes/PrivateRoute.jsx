@@ -6,5 +6,5 @@ export const PrivateRoute = ({ children }) => {
     const logged = isAuthenticated();
 
 
-  return logged ? children : <Navigate to="/NotFound" replace />;
+  return logged ? children : <Navigate to="/" replace />;
 };

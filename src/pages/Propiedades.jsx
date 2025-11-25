@@ -1,100 +1,118 @@
-import React, { useState } from "react";
-import { Link, useLoaderData, useNavigate } from "react-router-dom";
+import React, { } from "react";
+import { Link, useLoaderData } from "react-router-dom";
 import FormProp from "../components/FormProp";
+import {
+  Collapse,
+  Ripple,
+  initTWE,
+} from "tw-elements";
 
 const Propiedades = () => {
   const { participantes, buscado } = useLoaderData();
-  const navigate = useNavigate();
-  const [search, setSearch] = useState("");
+  initTWE({ Collapse, Ripple });
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    navigate(`?search=${search}`);
-  };
+
 
   const propiedades = buscado || participantes;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#101828] via-[#182230] to-[#0C111D] text-white">
-      <div className="max-w-6xl mx-auto px-6 py-12">
+    <div className="min-h-screen bg-gradient-to-br from-[#101828] via-[#182230] to-[#0C111D] text-white relative">
+      <div className="max-w-7xl mx-auto px-6 py-12">
 
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-10">
-          <h1 className="text-3xl md:text-4xl font-bold">Propiedades</h1>
 
-          <form onSubmit={handleSearch} className="flex items-center w-full md:w-1/2">
-            <input
-              type="text"
-              placeholder="Buscar propiedad por título o ciudad..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="flex-1 p-3 rounded-l-xl bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#475467]"
-            />
-            <button
-              type="submit"
-              className="bg-[#182230] text-white px-5 py-3 rounded-r-xl hover:bg-[#101828] transition"
-            >
-              Buscar
-            </button>
-          </form>
+        {/* Encabezado */}
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-14">
+          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-white drop-shadow-lg">
+            Propiedades
+          </h1>
+
+          <a
+            class="px-6 py-3 rounded-xl bg-[#1F2A37] text-sm font-semibold uppercase tracking-wide shadow-lg hover:bg-[#273445] transition-all duration-200 border border-white/10"
+            data-twe-collapse-init
+            data-twe-ripple-init
+            data-twe-ripple-color="light"
+            href="#collapseExample"
+            role="button"
+            aria-expanded="false"
+            aria-controls="collapseExample">
+            Agregar propiedad
+          </a>
+
+        </div>
+        <div
+          class="!visible hidden text-center"
+          id="collapseExample"
+          data-twe-collapse-item>
+          <FormProp />
         </div>
 
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+        {/* Grid de propiedades */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
           {propiedades?.length > 0 ? (
             propiedades.map((prop, index) => {
               const imagenPrincipal =
                 prop.imagenes?.[0]?.urlImagen ||
-                "https://placehold.co/400x250?text=Sin+Imagen";
+                "https://placehold.co/500x300?text=Sin+Imagen";
 
 
               return (
                 <div
                   key={index}
-                  className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300"
+                  className="group bg-white/10 backdrop-blur-xl border border-white/10 rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300"
                 >
+                  <div className="relative">
+                    <img
+                      src={imagenPrincipal}
+                      alt={prop.titulo}
+                      className="w-full h-52 object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                  </div>
 
-                  <img
-                    src={imagenPrincipal}
-                    alt={prop.titulo}
-                    className="w-full h-48 object-cover"
-                  />
 
-
-                  <div className="p-5 text-[#101828]">
-                    <h3 className="text-xl font-semibold mb-2 truncate">
+                  <div className="p-6 text-gray-100">
+                    <h3 className="text-2xl font-bold mb-1 truncate drop-shadow-sm">
                       {prop.titulo}
                     </h3>
-                    <p className="text-sm text-gray-600 mb-2 truncate">
+                    <p className="text-sm text-gray-300 mb-2 truncate">
                       {prop.ciudad || "Ubicación no disponible"}
                     </p>
-                    <p className="text-sm text-gray-500 mb-4 line-clamp-2">
+                    <p className="text-sm text-gray-400 mb-4 line-clamp-2">
                       {prop.descripcion || "Sin descripción."}
                     </p>
-                    <div className="flex justify-between items-center">
-                      <span className="text-lg font-bold text-[#182230]">
+
+
+                    <div className="flex justify-between items-center mt-4">
+                      <span className="text-xl font-extrabold text-white drop-shadow-sm">
                         ${prop.precioVenta || prop.precioRenta || "0.00"}
                       </span>
-                      <Link 
-                          to={`/propiedad/${prop.idPropiedad}`} 
-                          className="px-4 py-2 bg-[#182230] text-white rounded-lg text-sm hover:bg-[#101828] transition"
+
+
+                      <div className="flex gap-2">
+                        <Link
+                          to={`/propiedad/${prop.idPropiedad}`}
+                          className="px-4 py-2 rounded-lg bg-[#1F2A37] hover:bg-[#273445] text-white text-sm shadow-md transition"
                         >
                           Ver más
                         </Link>
-                      <Link to={`/editarProp${prop.idPropiedad}`}>Edit</Link>
+                        <Link
+                          to={`/editarProp/${prop.idPropiedad}`}
+                          className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm shadow-md transition"
+                        >
+                          Editar
+                        </Link>
+                      </div>
                     </div>
                   </div>
                 </div>
               );
             })
           ) : (
-            <p className="text-gray-400 text-center col-span-full">
+            <p className="text-gray-300 text-center col-span-full text-lg">
               No se encontraron propiedades.
             </p>
           )}
         </div>
-
-
-        <FormProp />
       </div>
     </div>
   );

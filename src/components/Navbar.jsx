@@ -1,11 +1,15 @@
 import { useAuth } from "../contexts/AuthContext";
 import React, { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
+import estateHubLogo from "../assets/estateHubLogoFullWhite.png";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { isAuthenticated, logout } = useAuth();
   const isLogged = isAuthenticated();
+  const storedUser = JSON.parse(localStorage.getItem("user"));
+  const email = storedUser?.usuario?.email;
+  const isAdmin = email === "alexis@gmail.com";
   const navigate = useNavigate();
 
 
@@ -20,28 +24,16 @@ const Navbar = () => {
         <div className="flex justify-between h-20">
           {/* Logo y marca */}
           <div className="flex items-center">
+
             <NavLink
-              to="/"
+              to="/home"
               className="flex-shrink-0 flex items-center group"
             >
-              <div className="w-10 h-10 bg-gray-900 rounded-lg flex items-center justify-center">
-                <svg
-                  className="w-6 h-6 text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-                  />
-                </svg>
-              </div>
-              <span className="text-white font-bold text-xl tracking-tight group-hover:text-[#E4E7EC] transition-colors duration-300">
-                EstateHub
-              </span>
+              <img
+                src={estateHubLogo}
+                alt="EstateHubLogo"
+                className="w-50 drop-shadow-lg animate-fadeIn"
+              />
             </NavLink>
           </div>
 
@@ -50,50 +42,62 @@ const Navbar = () => {
             <NavLink
               to="/home"
               className={({ isActive }) =>
-                `px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
-                  isActive
-                    ? "bg-[#182230] text-white shadow-md"
-                    : "text-[#98A2B3] hover:text-white hover:bg-[#344054]"
+                `px-4 py-2 rounded-lg font-medium transition-all duration-300 ${isActive
+                  ? "bg-[#182230] text-white shadow-md"
+                  : "text-[#98A2B3] hover:text-white hover:bg-[#344054]"
                 }`
               }
             >
               Inicio
             </NavLink>
-            
+
             <NavLink
               to="/propiedades"
               className={({ isActive }) =>
-                `px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
-                  isActive
-                    ? "bg-[#182230] text-white shadow-md"
-                    : "text-[#98A2B3] hover:text-white hover:bg-[#344054]"
+                `px-4 py-2 rounded-lg font-medium transition-all duration-300 ${isActive
+                  ? "bg-[#182230] text-white shadow-md"
+                  : "text-[#98A2B3] hover:text-white hover:bg-[#344054]"
                 }`
               }
             >
               Propiedades
             </NavLink>
-            
-            <NavLink
-              to="/registro"
-              className={({ isActive }) =>
-                `px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
-                  isActive
+
+            {isAdmin && (
+              <NavLink
+                to="/Usuarios"
+                className={({ isActive }) =>
+                  `px-4 py-2 rounded-lg font-medium transition-all duration-300 ${isActive
                     ? "bg-[#182230] text-white shadow-md"
                     : "text-[#98A2B3] hover:text-white hover:bg-[#344054]"
+                  }`
+                }
+              >
+                Usuarios
+              </NavLink>
+            )}
+
+
+            <NavLink
+              to="/citas"
+              className={({ isActive }) =>
+                `px-4 py-2 rounded-lg font-medium transition-all duration-300 ${isActive
+                  ? "bg-[#182230] text-white shadow-md"
+                  : "text-[#98A2B3] hover:text-white hover:bg-[#344054]"
                 }`
               }
             >
-              Formulario
+              Citas
             </NavLink>
-            
+
             <button className="ml-4 px-4 py-2 bg-gradient-to-r from-[#D0D5DD] to-[#E4E7EC] text-[#101828] font-semibold rounded-lg hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5">
               Contactar
             </button>
             {isLogged && (
-        <button className="w-full px-4 py-3 bg-gradient-to-r from-[#D0D5DD] to-[#E4E7EC] text-[#101828] font-semibold rounded-lg hover:shadow-lg transition-all duration-300" onClick={handleLogout}>
-          Logout
-        </button>
-        )}
+              <button className="w-full px-4 py-3 bg-gradient-to-r from-[#D0D5DD] to-[#E4E7EC] text-[#101828] font-semibold rounded-lg hover:shadow-lg transition-all duration-300" onClick={handleLogout}>
+                Logout
+              </button>
+            )}
           </div>
 
           {/* Botón menú móvil */}
@@ -136,45 +140,42 @@ const Navbar = () => {
             <NavLink
               to="/home"
               className={({ isActive }) =>
-                `block px-3 py-3 rounded-lg font-medium transition-colors duration-300 ${
-                  isActive
-                    ? "bg-[#344054] text-white"
-                    : "text-[#98A2B3] hover:text-white hover:bg-[#344054]"
+                `block px-3 py-3 rounded-lg font-medium transition-colors duration-300 ${isActive
+                  ? "bg-[#344054] text-white"
+                  : "text-[#98A2B3] hover:text-white hover:bg-[#344054]"
                 }`
               }
               onClick={() => setIsOpen(false)}
             >
               Inicio
             </NavLink>
-            
+
             <NavLink
               to="/propiedades"
               className={({ isActive }) =>
-                `block px-3 py-3 rounded-lg font-medium transition-colors duration-300 ${
-                  isActive
-                    ? "bg-[#344054] text-white"
-                    : "text-[#98A2B3] hover:text-white hover:bg-[#344054]"
+                `block px-3 py-3 rounded-lg font-medium transition-colors duration-300 ${isActive
+                  ? "bg-[#344054] text-white"
+                  : "text-[#98A2B3] hover:text-white hover:bg-[#344054]"
                 }`
               }
               onClick={() => setIsOpen(false)}
             >
               Propiedades
             </NavLink>
-            
+
             <NavLink
               to="/registro"
               className={({ isActive }) =>
-                `block px-3 py-3 rounded-lg font-medium transition-colors duration-300 ${
-                  isActive
-                    ? "bg-[#344054] text-white"
-                    : "text-[#98A2B3] hover:text-white hover:bg-[#344054]"
+                `block px-3 py-3 rounded-lg font-medium transition-colors duration-300 ${isActive
+                  ? "bg-[#344054] text-white"
+                  : "text-[#98A2B3] hover:text-white hover:bg-[#344054]"
                 }`
               }
               onClick={() => setIsOpen(false)}
             >
               Formulario
             </NavLink>
-            
+
             <div className="pt-2 pb-3">
               <button className="w-full px-4 py-3 bg-gradient-to-r from-[#D0D5DD] to-[#E4E7EC] text-[#101828] font-semibold rounded-lg hover:shadow-lg transition-all duration-300">
                 Contactar

@@ -1,10 +1,31 @@
 import { useAuth } from "../contexts/AuthContext";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import PropContext from "../contexts/Propiedad/PropContext";
+import { Link, useNavigate, useParams } from "react-router-dom";
+// Initialization for ES Users
+import {
+  Collapse,
+  Ripple,
+  initTWE,
+} from "tw-elements";
+
+
+
 
 const FormProp = () => {
   const { user, getIdUsuario } = useAuth();
-  const { postProp } = useContext(PropContext);
+  initTWE({ Collapse, Ripple });
+  const { postProp, putProp, getProp, selectedProp } = useContext(PropContext);
+  const {id} = useParams();
+  const navigate = useNavigate();
+  const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const hasLoaded = useRef(false);
+
+  console.log("idPropiedad desde useParams:", id);
+  console.log("isEditing:", isEditing);
+  console.log("selectedProp:", selectedProp);
+  
   const [formData, setFormData] = useState({
     titulo: "",
     descripcion: "",
@@ -50,42 +71,161 @@ const FormProp = () => {
   const handleImagenChange = (e) => {
     setImagenes([...e.target.files]);
   };
-
-  const handleSubmit = async (e) => {
-  e.preventDefault();
-
-  const idUsuario = getIdUsuario();
-  console.log("ID de usuario obtenido del contexto:", idUsuario);
-
-  try {
-    const propiedadData = {
-      idUsuario,
-      ...formData,
+  
+  // Cargar datos cuando es edición
+    useEffect(() => {
+    const loadPropiedadData = async () => {
+      // Evitar cargar múltiples veces
+      if (id && !hasLoaded.current) {
+        try {
+          setLoading(true);
+          setIsEditing(true);
+          hasLoaded.current = true;
+          await getProp(id);
+        } catch (error) {
+          console.error("Error al cargar propiedad:", error);
+          alert("Error al cargar los datos de la propiedad");
+        } finally {
+          setLoading(false);
+        }
+      }
     };
 
-    console.log("Propiedad enviada:", propiedadData);
+    loadPropiedadData();
+  }, [id, getProp]);
 
-    const response = await postProp(propiedadData);
 
-    // ✅ Aquí obtenemos correctamente el ID
-    const propiedadId = response?.data?.data?.idPropiedad;
-    console.log("ID de propiedad creada:", propiedadId);
+  // Actualizar formData cuando selectedProp cambie
+   useEffect(() => {
+    if (selectedProp && isEditing && hasLoaded.current) {
+      console.log("SelectedProp recibido:", selectedProp);
+      
+      
+      const newFormData = {
+        titulo: selectedProp.titulo || "",
+        descripcion: selectedProp.descripcion || "",
+        direccion: selectedProp.direccion || "",
+        latitud: selectedProp.latitud || "",
+        longitud: selectedProp.longitud || "",
+        colonia: selectedProp.colonia || "",
+        ciudad: selectedProp.ciudad || "",
+        estado: selectedProp.estado || "",
+        codigoPostal: selectedProp.codigoPostal || "",
+        tipoPropiedad: selectedProp.tipoPropiedad || "residencial",
+        estatus: selectedProp.estatus || "disponible",
+        precioVenta: selectedProp.precioVenta || "",
+        precioRenta: selectedProp.precioRenta || "",
+        numHabitaciones: selectedProp.numHabitaciones || "",
+        numBanios: selectedProp.numBanios || "",
+        metrosCuadrados: selectedProp.metrosCuadrados || "",
+        numEstacionamiento: selectedProp.numEstacionamiento || "",
+        plantas: selectedProp.plantas || "",
+        residencial: selectedProp.residencial || false,
+        jardin: selectedProp.jardin || false,
+        alberca: selectedProp.alberca || false,
+        sotano: selectedProp.sotano || false,
+        terraza: selectedProp.terraza || false,
+        cuartoServicio: selectedProp.cuartoServicio || false,
+        muebles: selectedProp.muebles || false,
+        credito: selectedProp.credito || false,
+        fechaRegistro: selectedProp.fechaRegistro ? selectedProp.fechaRegistro.split('T')[0] : "",
+        publicadoEcommerce: selectedProp.publicadoEcommerce || false,
+      };
 
-    if (!propiedadId) {
-      alert("Propiedad registrada, pero no se pudo obtener el ID para subir imágenes.");
-      return;
+      setFormData(prevFormData => {
+        if (JSON.stringify(prevFormData) !== JSON.stringify(newFormData)) {
+          return newFormData;
+        }
+        return prevFormData;
+      });
     }
-    if (imagenes.length > 0) {
-      await subirImagenes(propiedadId, imagenes);
-      alert("Propiedad registrada e imágenes subidas correctamente.");
-    } else {
-      alert("Propiedad registrada correctamente.");
+  }, [selectedProp, isEditing]);
+  
+  // Resetear hasLoaded
+  useEffect(() => {
+    return () => {
+      hasLoaded.current = false;
+    };
+  }, [id]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const idUsuario = getIdUsuario();
+    console.log("ID de usuario:", idUsuario);
+
+    try {
+      let response;
+      
+      if (isEditing) {
+        const propiedadData = {
+          idPropiedad: parseInt(id),
+          idUsuario: parseInt(idUsuario),
+          ...formData,
+          // Convertir strings vacíos a null para números
+          precioVenta: formData.precioVenta ? parseFloat(formData.precioVenta) : null,
+          precioRenta: formData.precioRenta ? parseFloat(formData.precioRenta) : null,
+          numHabitaciones: formData.numHabitaciones ? parseInt(formData.numHabitaciones) : null,
+          numBanios: formData.numBanios ? parseInt(formData.numBanios) : null,
+          metrosCuadrados: formData.metrosCuadrados ? parseFloat(formData.metrosCuadrados) : null,
+          numEstacionamiento: formData.numEstacionamiento ? parseInt(formData.numEstacionamiento) : null,
+          plantas: formData.plantas ? parseInt(formData.plantas) : null,
+        };
+
+        console.log("Propiedad a actualizar:", propiedadData);
+        response = await putProp(propiedadData);
+        
+        alert("Propiedad actualizada correctamente.");
+        navigate('/propiedades');
+      } else {
+        // Modo creación
+        const propiedadData = {
+          idUsuario: parseInt(idUsuario),
+          ...formData,
+          precioVenta: formData.precioVenta ? parseFloat(formData.precioVenta) : null,
+          precioRenta: formData.precioRenta ? parseFloat(formData.precioRenta) : null,
+          numHabitaciones: formData.numHabitaciones ? parseInt(formData.numHabitaciones) : null,
+          numBanios: formData.numBanios ? parseInt(formData.numBanios) : null,
+          metrosCuadrados: formData.metrosCuadrados ? parseFloat(formData.metrosCuadrados) : null,
+          numEstacionamiento: formData.numEstacionamiento ? parseInt(formData.numEstacionamiento) : null,
+          plantas: formData.plantas ? parseInt(formData.plantas) : null,
+        };
+
+        console.log("Propiedad a crear:", propiedadData);
+        response = await postProp(propiedadData);
+
+        const propiedadId = response?.data?.data?.idPropiedad;
+        console.log("ID de propiedad creada:", propiedadId);
+
+        if (propiedadId && imagenes.length > 0) {
+          await subirImagenes(propiedadId, imagenes);
+          alert("Propiedad registrada e imágenes subidas correctamente.");
+        } else if (propiedadId) {
+          alert("Propiedad registrada correctamente.");
+        } else {
+          alert("Propiedad registrada, pero no se pudo obtener el ID para subir imágenes.");
+        }
+        navigate('/propiedades');
+      }
+      
+    } catch (error) {
+      console.error(`Error al ${isEditing ? 'actualizar' : 'registrar'} propiedad:`, error);
+      alert(`Hubo un error al ${isEditing ? 'actualizar' : 'registrar'} la propiedad.`);
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    console.error("Error al registrar propiedad:", error);
-    alert("Hubo un error al registrar la propiedad.");
+  };
+
+  if (loading) {
+    return (
+      <section className="py-24 bg-gradient-to-br from-[#101828] via-[#182230] to-[#0C111D] text-white">
+        <div className="max-w-5xl mx-auto px-6 lg:px-8 text-center">
+          <p>Cargando...</p>
+        </div>
+      </section>
+    );
   }
-};
 
 
 
@@ -132,7 +272,13 @@ const FormProp = () => {
 
 
   return (
-    <section className="py-24 bg-gradient-to-br from-[#101828] via-[#182230] to-[#0C111D] text-white">
+    /**
+    <div
+  class="!visible hidden text-center"
+  id="collapseExample"
+  data-twe-collapse-item>
+   */
+    <section className="py-24 bg-gradient-to-br from-[#101828] via-[#182230] to-[#0C111D] text-white" >
       <div className="max-w-5xl mx-auto px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
@@ -410,6 +556,9 @@ const FormProp = () => {
         </form>
       </div>
     </section>
+    /** 
+    </div>
+    */
   );
 };
 

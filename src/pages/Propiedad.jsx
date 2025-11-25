@@ -1,3 +1,4 @@
+import Mapa from "../components/Mapa";
 import React from "react";
 import { useLoaderData, Link } from "react-router-dom";
 
@@ -19,7 +20,7 @@ const Propiedad = () => {
           to="/propiedades"
           className="inline-block mb-6 px-4 py-2 bg-[#182230] hover:bg-[#101828] rounded-lg transition"
         >
-          ← Regresar
+          Regresar
         </Link>
 
         {/* Imagen principal */}
@@ -93,6 +94,9 @@ const Propiedad = () => {
             </div>
           </div>
         )}
+        <h1 className="text-3xl font-bold mb-2">Ubicación</h1>
+
+        <Mapa direccion={`${propiedad.direccion}, ${propiedad.colonia}, ${propiedad.ciudad}, ${propiedad.estado}, ${propiedad.codigoPostal}`} />
       </div>
     </div>
   );

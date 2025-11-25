@@ -13,7 +13,7 @@ const Home = () => {
       {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-[#101828] via-[#182230] to-[#0C111D] text-white overflow-hidden">
         <div className="absolute inset-0 bg-black/20"></div>
-        
+
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-0 left-0 w-72 h-72 bg-[#D0D5DD] rounded-full mix-blend-soft-light filter blur-3xl animate-pulse"></div>
@@ -30,21 +30,21 @@ const Home = () => {
             </h1>
 
             <p className="text-xl md:text-2xl text-[#98A2B3] max-w-3xl mx-auto mb-12 leading-relaxed">
-              Descubre propiedades exclusivas con tecnología avanzada. 
+              Descubre propiedades exclusivas con tecnología avanzada.
               Más de 10,000 propiedades premium listadas y actualizadas en tiempo real.
             </p>
-            
+
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <button className="px-8 py-4 bg-gradient-to-r from-[#D0D5DD] to-[#E4E7EC] text-[#101828] font-semibold rounded-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 hover:scale-105">
+              <Link to="/propiedades" className="px-8 py-4 bg-gradient-to-r from-[#D0D5DD] to-[#E4E7EC] text-[#101828] font-semibold rounded-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 hover:scale-105">
                 Explorar Propiedades
-              </button>
+              </Link>
               <button className="px-8 py-4 border-2 border-[#667085] text-white font-semibold rounded-xl hover:bg-white/10 transition-all duration-300">
                 Ver Demo
               </button>
             </div>
           </div>
         </div>
-        
+
         {/* Scroll Indicator */}
         <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
           <div className="w-6 h-10 border-2 border-[#98A2B3] rounded-full flex justify-center">
@@ -66,57 +66,63 @@ const Home = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-          {propiedades?.length > 0 ? (
-            propiedades.map((prop, index) => {
-              const imagenPrincipal =
-                prop.imagenes?.[0]?.urlImagen ||
-                "https://via.placeholder.com/400x250?text=Sin+Imagen";
-
-              return (
-                <div
-                  key={index}
-                  className="group p-8 rounded-2xl border border-[#E4E7EC] hover:border-[#D0D5DD] hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2"
-                >
-
-                  <img
-                    src={imagenPrincipal}
-                    alt={prop.titulo}
-                    className="w-full h-48 object-cover"
-                  />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+            {propiedades?.length > 0 ? (
+              propiedades.map((prop, index) => {
+                const imagenPrincipal =
+                  prop.imagenes?.[0]?.urlImagen ||
+                  "https://placehold.co/500x300?text=Sin+Imagen";
 
 
-                  <div className="p-5 text-[#101828]">
-                    <h3 className="text-xl font-semibold mb-2 truncate">
-                      {prop.titulo}
-                    </h3>
-                    <p className="text-sm text-gray-600 mb-2 truncate">
-                      {prop.ciudad || "Ubicación no disponible"}
-                    </p>
-                    <p className="text-sm text-gray-500 mb-4 line-clamp-2">
-                      {prop.descripcion || "Sin descripción."}
-                    </p>
-                    <div className="flex justify-between items-center">
-                      <span className="text-lg font-bold text-[#182230]">
-                        ${prop.precioVenta || prop.precioRenta || "0.00"}
-                      </span>
-                      <Link 
-                        to={`/propiedad/${prop.idPropiedad}`} 
-                        className="px-4 py-2 bg-[#182230] text-white rounded-lg text-sm hover:bg-[#101828] transition"
-                      >
-                        Ver más
-                      </Link>
+                return (
+                  <div
+                    key={index}
+                    className="group bg-white/10 backdrop-blur-xl border border-[#EAECF0] rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300"
+                  >
+                    <div className="relative">
+                      <img
+                        src={imagenPrincipal}
+                        alt={prop.titulo}
+                        className="w-full h-52 object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                    </div>
+
+
+                    <div className="p-6 text-[#101828]">
+                      <h3 className="text-2xl font-bold mb-1 truncate">
+                        {prop.titulo}
+                      </h3>
+                      <p className="text-sm text-gray-600 mb-2 truncate">
+                        {prop.ciudad || "Ubicación no disponible"}
+                      </p>
+                      <p className="text-sm text-gray-500 mb-4 line-clamp-2">
+                        {prop.descripcion || "Sin descripción."}
+                      </p>
+
+
+                      <div className="flex justify-between items-center mt-4">
+                        <span className="text-xl font-extrabold text-[#182230]">
+                          ${prop.precioVenta || prop.precioRenta || "0.00"}
+                        </span>
+
+
+                        <Link
+                          to={`/propiedad/${prop.idPropiedad}`}
+                          className="px-4 py-2 rounded-lg bg-[#1F2A37] hover:bg-[#273445] text-white text-sm shadow-md transition"
+                        >
+                          Ver más
+                        </Link>
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })
-          ) : (
-            <p className="text-gray-400 text-center col-span-full">
-              No se encontraron propiedades.
-            </p>
-          )}
-        </div>
+                );
+              })
+            ) : (
+              <p className="text-gray-400 text-center col-span-full text-lg">
+                No se encontraron propiedades.
+              </p>
+            )}
+          </div>
         </div>
       </section>
 
@@ -147,7 +153,7 @@ const Home = () => {
           <p className="text-xl text-[#475467] mb-12 max-w-2xl mx-auto">
             Únete a miles de personas que ya encontraron su hogar ideal con nuestra plataforma
           </p>
-          
+
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <button className="px-8 py-4 bg-gradient-to-r from-[#101828] to-[#182230] text-white font-semibold rounded-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
               Crear Cuenta Gratis
@@ -159,7 +165,7 @@ const Home = () => {
         </div>
       </section>
 
-      
+
     </div>
   )
 }
