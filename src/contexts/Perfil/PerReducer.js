@@ -3,17 +3,15 @@ import { PUT_PER } from "../types";
 
 
 export default (state, action) =>{
-    //Destructuramos el action
+    
     const {type, payload} = action;
 
     switch (type){
-        
         case PUT_PER:
             return{
-                ...state,
-                per:payload
+                pers: [...state.pers, payload],
+                selectedPer: payload
             }
-
 
             default:
                 return state;

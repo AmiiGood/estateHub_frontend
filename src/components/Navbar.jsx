@@ -8,7 +8,6 @@ const Navbar = () => {
   const isLogged = isAuthenticated();
   const navigate = useNavigate();
 
-
   const handleLogout = () => {
     logout();
     navigate("/");
@@ -20,10 +19,7 @@ const Navbar = () => {
         <div className="flex justify-between h-20">
           {/* Logo y marca */}
           <div className="flex items-center">
-            <NavLink
-              to="/"
-              className="flex-shrink-0 flex items-center group"
-            >
+            <NavLink to="/" className="flex-shrink-0 flex items-center group">
               <div className="w-10 h-10 bg-gray-900 rounded-lg flex items-center justify-center">
                 <svg
                   className="w-6 h-6 text-white"
@@ -59,7 +55,7 @@ const Navbar = () => {
             >
               Inicio
             </NavLink>
-            
+
             <NavLink
               to="/propiedades"
               className={({ isActive }) =>
@@ -72,9 +68,9 @@ const Navbar = () => {
             >
               Propiedades
             </NavLink>
-            
+
             <NavLink
-              to="/registro"
+              to="/contratos"
               className={({ isActive }) =>
                 `px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
                   isActive
@@ -83,17 +79,47 @@ const Navbar = () => {
                 }`
               }
             >
-              Formulario
+              Contratos
             </NavLink>
-            
+
+            <NavLink
+              to="/pagos"
+              className={({ isActive }) =>
+                `px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
+                  isActive
+                    ? "bg-[#182230] text-white shadow-md"
+                    : "text-[#98A2B3] hover:text-white hover:bg-[#344054]"
+                }`
+              }
+            >
+              Pagos
+            </NavLink>
+
+            <NavLink
+              to="/perfil"
+              className={({ isActive }) =>
+                `block px-3 py-3 rounded-lg font-medium transition-colors duration-300 ${
+                  isActive
+                    ? "bg-[#344054] text-white"
+                    : "text-[#98A2B3] hover:text-white hover:bg-[#344054]"
+                }`
+              }
+              onClick={() => setIsOpen(false)}
+            >
+              Perfil
+            </NavLink>
+
             <button className="ml-4 px-4 py-2 bg-gradient-to-r from-[#D0D5DD] to-[#E4E7EC] text-[#101828] font-semibold rounded-lg hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5">
               Contactar
             </button>
             {isLogged && (
-        <button className="w-full px-4 py-3 bg-gradient-to-r from-[#D0D5DD] to-[#E4E7EC] text-[#101828] font-semibold rounded-lg hover:shadow-lg transition-all duration-300" onClick={handleLogout}>
-          Logout
-        </button>
-        )}
+              <button
+                className="w-full px-4 py-3 bg-gradient-to-r from-[#D0D5DD] to-[#E4E7EC] text-[#101828] font-semibold rounded-lg hover:shadow-lg transition-all duration-300"
+                onClick={handleLogout}
+              >
+                Logout
+              </button>
+            )}
           </div>
 
           {/* Botón menú móvil */}
@@ -146,7 +172,7 @@ const Navbar = () => {
             >
               Inicio
             </NavLink>
-            
+
             <NavLink
               to="/propiedades"
               className={({ isActive }) =>
@@ -160,7 +186,7 @@ const Navbar = () => {
             >
               Propiedades
             </NavLink>
-            
+
             <NavLink
               to="/registro"
               className={({ isActive }) =>
@@ -174,12 +200,20 @@ const Navbar = () => {
             >
               Formulario
             </NavLink>
-            
-            <div className="pt-2 pb-3">
-              <button className="w-full px-4 py-3 bg-gradient-to-r from-[#D0D5DD] to-[#E4E7EC] text-[#101828] font-semibold rounded-lg hover:shadow-lg transition-all duration-300">
-                Contactar
-              </button>
-            </div>
+
+            <NavLink
+              to="/perfil"
+              className={({ isActive }) =>
+                `block px-3 py-3 rounded-lg font-medium transition-colors duration-300 ${
+                  isActive
+                    ? "bg-[#344054] text-white"
+                    : "text-[#98A2B3] hover:text-white hover:bg-[#344054]"
+                }`
+              }
+              onClick={() => setIsOpen(false)}
+            >
+              Perfil
+            </NavLink>
           </div>
         </div>
       )}
