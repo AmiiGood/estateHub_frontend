@@ -90,9 +90,17 @@ const Navbar = () => {
               Citas
             </NavLink>
 
-            <button className="ml-4 px-4 py-2 bg-gradient-to-r from-[#D0D5DD] to-[#E4E7EC] text-[#101828] font-semibold rounded-lg hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5">
-              Contactar
-            </button>
+            <NavLink
+              to="/gastosMantenimiento"
+              className={({ isActive }) =>
+                `px-4 py-2 rounded-lg font-medium transition-all duration-300 ${isActive
+                  ? "bg-[#182230] text-white shadow-md"
+                  : "text-[#98A2B3] hover:text-white hover:bg-[#344054]"
+                }`
+              }
+            >
+              GastosMantenimiento
+            </NavLink>
             {isLogged && (
               <button className="w-full px-4 py-3 bg-gradient-to-r from-[#D0D5DD] to-[#E4E7EC] text-[#101828] font-semibold rounded-lg hover:shadow-lg transition-all duration-300" onClick={handleLogout}>
                 Logout

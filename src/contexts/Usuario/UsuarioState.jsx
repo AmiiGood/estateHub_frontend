@@ -4,158 +4,214 @@
 
 import React, { useReducer } from 'react'
 import axios from 'axios';
-import { POST_USER } from '../types';
+import { DELETE_USER, POST_USER, PUT_USER } from '../types';
 import UsuarioReducer from './UsuarioReducer';
 import UsuarioContext from './UsuarioContext';
 
 
 const UsuarioState = (userss) => {
 
-    //Definimos el estado inicial
-    const initialState = {
-  users: [],
-  selectedUser: null
-};
+  //Definimos el estado inicial
+  const initialState = {
+    users: [],
+    selectedUser: null
+  };
 
-//x-api-key: reqres-free-v1
-    //Definimos el useReducer para manejar el estado de la aplicación.
-    const [state, dispatch] = useReducer(UsuarioReducer, initialState);
+  //x-api-key: reqres-free-v1
+  //Definimos el useReducer para manejar el estado de la aplicación.
+  const [state, dispatch] = useReducer(UsuarioReducer, initialState);
 
-    
-    const postUser = async (usuarioData) => {
-  try {
-    const storedUser = localStorage.getItem("user");
-    const userData = storedUser ? JSON.parse(storedUser) : null;
-    const token = userData?.token;
 
-    if (!token) {
-      console.error("No existe token en localStorage");
-      throw new Error("No autorizado");
-    }
+  const postUser = async (usuarioData) => {
+    try {
+      const storedUser = localStorage.getItem("user");
+      const userData = storedUser ? JSON.parse(storedUser) : null;
+      const token = userData?.token;
 
-    const res = await axios.post(
-      "http://localhost:3000/api/usuarios/postUsuario",
-      { usuario: usuarioData },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      if (!token) {
+        console.error("No existe token en localStorage");
+        throw new Error("No autorizado");
       }
-    );
 
-    dispatch({
-      type: POST_USER,
-      payload: res.data.data,
-    });
+      const res = await axios.post(
+        "http://localhost:3000/api/usuarios/postUsuario",
+        { usuario: usuarioData },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-    return res;
-  } catch (error) {
-    console.error("Error al registrar usuarios:", error);
-    throw error;
+      dispatch({
+        type: POST_USER,
+        payload: res.data.data,
+      });
+
+      return res;
+    } catch (error) {
+      console.error("Error al registrar usuarios:", error);
+      throw error;
+    }
+  };
+
+
+  // Función para obtener una propiedad específica
+  const getUser = async (idUsuario) => {
+    try {
+      const storedUser = localStorage.getItem("user");
+      const userData = storedUser ? JSON.parse(storedUser) : null;
+      const token = userData?.token;
+
+      if (!token) {
+        console.error("No existe token en localStorage");
+        throw new Error("No autorizado");
+      }
+
+      const res = await axios.get(
+        `http://localhost:3000/api/usuarios/getUsuario/${idUsuario}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      console.log("Datos recibidos de la API:", res.data.data);
+
+      dispatch({
+        type: 'GET_USER',
+        payload: res.data.data,
+      });
+
+      return res;
+    } catch (error) {
+      console.error("Error al obtener el usuario:", error);
+      throw error;
+    }
+  };
+
+
+  const putUser = async (usuarioData) => {
+    try {
+      const storedUser = localStorage.getItem("user");
+      const userData = storedUser ? JSON.parse(storedUser) : null;
+      const token = userData?.token;
+
+      if (!token) {
+        console.error("No existe token en localStorage");
+        throw new Error("No autorizado");
+      }
+
+      const res = await axios.put(
+        'http://localhost:3000/api/usuarios/putUsuario',
+        { usuario: usuarioData },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      console.log("Respuesta del servidor:", res.data);
+
+      dispatch({
+        type: 'PUT_USER',
+        payload: res.data.data
+      });
+
+      return res;
+    } catch (error) {
+      console.error("Error al actualizar usuario:", error);
+      throw error;
+    }
   }
-};
 
-
- // Función para obtener una propiedad específica
-    const getUser = async (idUsuario) => {
+  const deleteUser = async (id) => {
     try {
-        const storedUser = localStorage.getItem("user");
-        const userData = storedUser ? JSON.parse(storedUser) : null;
-        const token = userData?.token;
+      const storedUser = localStorage.getItem("user");
+      const userData = storedUser ? JSON.parse(storedUser) : null;
+      const token = userData?.token;
 
-        if (!token) {
-            console.error("No existe token en localStorage");
-            throw new Error("No autorizado");
-        }
-
-        const res = await axios.get(
-            `http://localhost:3000/api/usuarios/getUsuario/${idUsuario}`,
-            {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            }
-        );
-
-        console.log("Datos recibidos de la API:", res.data.data); 
-
-        dispatch({
-            type: 'GET_USER',
-            payload: res.data.data,
+      if (!token) {
+        console.error("No existe token en localStorage");
+        throw new Error("No autorizado");
+      }
+      const res = await axios.delete('http://localhost:3000/api/usuarios/deleteUsuario/' + id,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         });
+      console.log("Código de respuesta:", res.status);
+      //Pasamos los datos al reducer
+      dispatch({
+        type: DELETE_USER,
+        payload: id
+      });
 
-        return res;
+      return res;
     } catch (error) {
-        console.error("Error al obtener el usuario:", error);
-        throw error;
+      console.error("Error al actualizar usuario:", error);
+      throw error;
     }
-};
+  }
 
-
-const putUser = async (usuarioData) => {
+  const reactivateUser = async (id) => {
     try {
-        const storedUser = localStorage.getItem("user");
-        const userData = storedUser ? JSON.parse(storedUser) : null;
-        const token = userData?.token;
+      const storedUser = localStorage.getItem("user");
+      const userData = storedUser ? JSON.parse(storedUser) : null;
+      const token = userData?.token;
 
-        if (!token) {
-            console.error("No existe token en localStorage");
-            throw new Error("No autorizado");
+      const res = await axios.put(
+        "http://localhost:3000/api/usuarios/putUsuario",
+        {
+          usuario: {
+            idUsuario: id,
+            activo: 1
+          }
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
+      );
 
-        const res = await axios.put(
-            'http://localhost:3000/api/usuarios/putUsuario',
-            { propiedad: usuarioData },
-            {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            }
-        );
-        
-        console.log("Respuesta del servidor:", res.data);
-        
-        dispatch({
-            type: 'PUT_PROP',
-            payload: res.data.data
-        });
-        
-        return res; 
+      dispatch({
+        type: PUT_USER,
+        payload: res.data.data
+      });
+
+      return res;
+
     } catch (error) {
-        console.error("Error al actualizar usuario:", error);
-        throw error;
+      console.log(error);
     }
-}
-
-const deleteUser = async (id) =>{
-        const res = await axios.delete('http://localhost:3000/api/usuarios/deleteUsuario '+ id,
-            {headers: {'x-api-key': 'reqres-free-v1'}
-        });
-        console.log("Código de respuesta:", res.status);
-        //Pasamos los datos al reducer
-        dispatch({
-                type:POST_USER,
-                payload: res.data.data
-            })
-        return res; 
-    }
+  };
 
 
 
 
 
-    
+
+
+
+
+
+
 
   return (
     <UsuarioContext.Provider value={{
-    users: state.users,
-    selectedUser: state.selectedUser,
-    postUser,
-    putUser,
-    deleteUser,
-    getUser
+      users: state.users,
+      selectedUser: state.selectedUser,
+      postUser,
+      putUser,
+      deleteUser,
+      getUser,
+      reactivateUser
     }}>
-        {userss.children}
+      {userss.children}
     </UsuarioContext.Provider>
 
   )

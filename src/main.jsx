@@ -7,14 +7,17 @@ import { AuthProvider } from './contexts/AuthContext'
 import { RouterProvider } from 'react-router-dom'
 import PropState from './contexts/Propiedad/PropState'
 import UsuarioState from './contexts/Usuario/UsuarioState'
+import GastosMState from './contexts/GastosM/GastosMState'
 
 createRoot(document.getElementById('root')).render(
-   <StrictMode>
+  <StrictMode>
     <AuthProvider>
       <PropState>
-      <UsuarioState>
-      <RouterProvider router={router} />
-      </UsuarioState>
+        <UsuarioState>
+          <GastosMState>
+            <RouterProvider router={router} />
+          </GastosMState>
+        </UsuarioState>
       </PropState>
     </AuthProvider>
   </StrictMode>,

@@ -16,7 +16,7 @@ const FormProp = () => {
   const { user, getIdUsuario } = useAuth();
   initTWE({ Collapse, Ripple });
   const { postProp, putProp, getProp, selectedProp } = useContext(PropContext);
-  const {id} = useParams();
+  const { id } = useParams();
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -25,7 +25,7 @@ const FormProp = () => {
   console.log("idPropiedad desde useParams:", id);
   console.log("isEditing:", isEditing);
   console.log("selectedProp:", selectedProp);
-  
+
   const [formData, setFormData] = useState({
     titulo: "",
     descripcion: "",
@@ -56,24 +56,87 @@ const FormProp = () => {
     fechaRegistro: "",
     publicadoEcommerce: false,
   });
-  
+
   const [imagenes, setImagenes] = useState([]);
   const [idPropiedadCreada, setIdPropiedadCreada] = useState(null);
 
+  const sanitizeNumber = (value, allowFloat = false) => {
+    if (!value) return "";
+
+    // Evitar signos negativos
+    value = value.replace(/-/g, "");
+
+    // Permitir solo números (y opcionalmente decimales)
+    const regex = allowFloat ? /[^0-9.]/g : /[^0-9]/g;
+    value = value.replace(regex, "");
+
+    // Evitar múltiples puntos decimales
+    if (allowFloat) {
+      const parts = value.split(".");
+      if (parts.length > 2) {
+        value = parts[0] + "." + parts.slice(1).join("");
+      }
+    }
+
+    return value;
+  };
+
+
+  const sanitizeText = (value) => {
+    if (!value) return "";
+    return value
+      .replace(/<[^>]*>?/gm, "") // Evita scripts/HTML
+      .trimStart(); // Evita espacios al inicio
+  };
+
+
   const handleChange = (e) => {
     const { name, type, value, checked } = e.target;
+    // Campos numéricos
+    const numericFields = [
+      "precioVenta",
+      "precioRenta",
+      "numHabitaciones",
+      "numBanios",
+      "metrosCuadrados",
+      "numEstacionamiento",
+      "plantas",
+      "latitud",
+      "longitud"
+    ];
+
+    // Sanitización de checkbox
+    if (type === "checkbox") {
+      return setFormData({
+        ...formData,
+        [name]: checked,
+      });
+    }
+
+    // Sanitizar números
+    if (numericFields.includes(name)) {
+      const sanitized = sanitizeNumber(value, true);
+      return setFormData({
+        ...formData,
+        [name]: sanitized,
+      });
+    }
+
+    // Sanitizar texto
+    const sanitizedText = sanitizeText(value);
+
     setFormData({
       ...formData,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: sanitizedText,
     });
   };
 
   const handleImagenChange = (e) => {
     setImagenes([...e.target.files]);
   };
-  
+
   // Cargar datos cuando es edición
-    useEffect(() => {
+  useEffect(() => {
     const loadPropiedadData = async () => {
       // Evitar cargar múltiples veces
       if (id && !hasLoaded.current) {
@@ -96,11 +159,11 @@ const FormProp = () => {
 
 
   // Actualizar formData cuando selectedProp cambie
-   useEffect(() => {
+  useEffect(() => {
     if (selectedProp && isEditing && hasLoaded.current) {
       console.log("SelectedProp recibido:", selectedProp);
-      
-      
+
+
       const newFormData = {
         titulo: selectedProp.titulo || "",
         descripcion: selectedProp.descripcion || "",
@@ -140,7 +203,7 @@ const FormProp = () => {
       });
     }
   }, [selectedProp, isEditing]);
-  
+
   // Resetear hasLoaded
   useEffect(() => {
     return () => {
@@ -157,7 +220,7 @@ const FormProp = () => {
 
     try {
       let response;
-      
+
       if (isEditing) {
         const propiedadData = {
           idPropiedad: parseInt(id),
@@ -175,7 +238,7 @@ const FormProp = () => {
 
         console.log("Propiedad a actualizar:", propiedadData);
         response = await putProp(propiedadData);
-        
+
         alert("Propiedad actualizada correctamente.");
         navigate('/propiedades');
       } else {
@@ -208,7 +271,7 @@ const FormProp = () => {
         }
         navigate('/propiedades');
       }
-      
+
     } catch (error) {
       console.error(`Error al ${isEditing ? 'actualizar' : 'registrar'} propiedad:`, error);
       alert(`Hubo un error al ${isEditing ? 'actualizar' : 'registrar'} la propiedad.`);
@@ -230,45 +293,45 @@ const FormProp = () => {
 
 
   const subirImagenes = async (propiedadId, archivos) => {
-  try {
-    const storedUser = localStorage.getItem("user");
-    const userData = storedUser ? JSON.parse(storedUser) : null;
-    const token = userData?.token;
+    try {
+      const storedUser = localStorage.getItem("user");
+      const userData = storedUser ? JSON.parse(storedUser) : null;
+      const token = userData?.token;
 
-    if (!token) {
-      throw new Error("No autorizado. Token no encontrado.");
-    }
-
-    const formData = new FormData();
-
-    archivos.forEach((archivo) => {
-      formData.append("fotos", archivo);
-    });
-
-    const response = await fetch(
-      `http://localhost:3000/api/propiedades/subirFotos/${propiedadId}`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
+      if (!token) {
+        throw new Error("No autorizado. Token no encontrado.");
       }
-    );
 
-    if (!response.ok) {
-      throw new Error("Error al subir imágenes");
+      const formData = new FormData();
+
+      archivos.forEach((archivo) => {
+        formData.append("fotos", archivo);
+      });
+
+      const response = await fetch(
+        `http://localhost:3000/api/propiedades/subirFotos/${propiedadId}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Error al subir imágenes");
+      }
+
+      const result = await response.json();
+      console.log("Imágenes subidas:", result);
+      return result;
+
+    } catch (error) {
+      console.error("Error al subir imágenes:", error);
+      throw error;
     }
-
-    const result = await response.json();
-    console.log("Imágenes subidas:", result);
-    return result;
-
-  } catch (error) {
-    console.error("Error al subir imágenes:", error);
-    throw error;
-  }
-};
+  };
 
 
   return (
@@ -523,7 +586,7 @@ const FormProp = () => {
               <p className="text-sm text-gray-600">
                 Puedes seleccionar múltiples imágenes (máximo 10)
               </p>
-              
+
               {/* Vista previa de imágenes */}
               {imagenes.length > 0 && (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">

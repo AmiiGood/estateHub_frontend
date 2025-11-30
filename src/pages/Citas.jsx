@@ -1,9 +1,10 @@
-import { useLoaderData } from "react-router-dom";
+import { Link, useLoaderData } from "react-router-dom";
+import { useState } from "react";
 
 const Citas = () => {
   const { citas } = useLoaderData();
 
-  // Funciones para formatear fecha/hora
+  // ---- Formatos ----
   const formatearFecha = (fecha) =>
     new Date(fecha).toLocaleDateString("es-MX", {
       year: "numeric",
@@ -17,27 +18,47 @@ const Citas = () => {
       minute: "2-digit",
     });
 
-  // Agrupar citas por día del mes
-  const citasPorDia = citas.reduce((acc, cita) => {
-    const dia = new Date(cita.fecha).getDate();
-    if (!acc[dia]) acc[dia] = [];
-    acc[dia].push(cita);
+  // ---- Año seleccionado ----
+  const yearActual = new Date().getFullYear();
+  const [year, setYear] = useState(yearActual);
+
+  // ---- Agrupación por mes/día ----
+  const citasPorMesDia = citas.reduce((acc, cita) => {
+    const fecha = new Date(cita.fecha);
+    const y = fecha.getFullYear();
+    if (y !== year) return acc;
+
+    const mes = fecha.getMonth(); // 0-11
+    const dia = fecha.getDate();
+
+    if (!acc[mes]) acc[mes] = {};
+    if (!acc[mes][dia]) acc[mes][dia] = [];
+    acc[mes][dia].push(cita);
+
     return acc;
   }, {});
-  
+
+  const meses = [
+    "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+  ];
+
+  const generarDiasMes = (mes) => {
+    const total = new Date(year, mes + 1, 0).getDate();
+    const inicio = new Date(year, mes, 1).getDay();
+
+    const arr = [];
+    for (let i = 0; i < inicio; i++) arr.push(null);
+    for (let d = 1; d <= total; d++) arr.push(d);
+    return arr;
+  };
 
   return (
-
     <section className="relative bg-stone-50">
-      <div className="bg-sky-400 w-full sm:w-40 h-40 rounded-full absolute top-1 opacity-20 max-sm:right-0 sm:left-56 z-0"></div>
-      <div className="bg-emerald-500 w-full sm:w-40 h-24 absolute top-0 -left-0 opacity-20 z-0"></div>
-      <div className="bg-purple-600 w-full sm:w-40 h-24 absolute top-40 -left-0 opacity-20 z-0"></div>
-
       <div className="w-full py-24 relative z-10 backdrop-blur-3xl">
         <div className="w-full max-w-7xl mx-auto px-2 lg:px-8">
           <div className="grid grid-cols-12 gap-8 max-w-4xl mx-auto xl:max-w-full">
-            
-            {/* ----------------------  CARDS ---------------------- */}
+
             <div className="col-span-12 xl:col-span-5">
               <h2 className="font-manrope text-3xl leading-tight text-gray-900 mb-1.5">
                 Próximas Citas
@@ -73,6 +94,14 @@ const Citas = () => {
                             {cit.estatus.replace("_", " ")}
                           </span>
                         </p>
+                        <br></br>
+
+                        <Link
+                          to={`/cita/${cit.idCita}`}
+                          className="px-4 py-2 rounded-lg bg-[#1F2A37] hover:bg-[#273445] text-white text-sm shadow-md transition"
+                        >
+                          Ver más
+                        </Link>
                       </div>
                     );
                   })
@@ -84,73 +113,90 @@ const Citas = () => {
               </div>
             </div>
 
-            {/* ----------------------  CALENDARIO ---------------------- */}
-            <div className="col-span-12 xl:col-span-7 px-2.5 py-5 sm:p-8 bg-gradient-to-b from-white/25 to-white xl:bg-white rounded-2xl max-xl:row-start-1">
 
-              {/* Encabezado */}
-              <div className="flex flex-col md:flex-row gap-4 items-center justify-between mb-5">
-                <div className="flex items-center gap-4">
-                  <h5 className="text-xl leading-8 font-semibold text-gray-900">
-                    Enero 2025
-                  </h5>
-                </div>
+            <div className="col-span-12 xl:col-span-7 px-2.5 py-5 sm:p-8 bg-white rounded-2xl">
+
+              {/* Filtro por año */}
+              <div className="flex justify-between mb-6 items-center">
+                <h5 className="text-xl font-semibold text-gray-900">Calendario</h5>
+
+                <select
+                  className="border px-3 py-2 rounded-lg"
+                  value={year}
+                  onChange={(e) => setYear(Number(e.target.value))}
+                >
+                  {Array.from({ length: 5 }, (_, i) => yearActual - 2 + i).map((y) => (
+                    <option key={y} value={y}>{y}</option>
+                  ))}
+                </select>
               </div>
 
-              
-              <div className="border border-indigo-200 rounded-xl">
-                <div className="grid grid-cols-7 rounded-t-3xl border-b border-indigo-200">
-                  {["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"].map((d) => (
-                    <div
-                      key={d}
-                      className="py-3.5 border-r border-indigo-200 bg-indigo-50 flex items-center justify-center text-sm font-medium text-indigo-600"
-                    >
-                      {d}
-                    </div>
-                  ))}
-                </div>
+              {/* GRID 12 MESES */}
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-1 gap-6">
+                {meses.map((nombreMes, indexMes) => {
+                  const diasMes = generarDiasMes(indexMes);
 
-                {/* Días */}
-                <div className="grid grid-cols-7 rounded-b-xl">
-                  {Array.from({ length: 31 }, (_, i) => i + 1).map((dia) => (
-                    <div
-                      key={dia}
-                      className="relative flex xl:aspect-square max-xl:min-h-[60px] p-3 bg-white border-r border-b border-indigo-200 transition-all duration-300 hover:bg-indigo-50 cursor-pointer"
-                    >
-                      <span className="text-xs font-semibold text-gray-900">
-                        {dia}
-                      </span>
+                  return (
+                    <div key={nombreMes} className="border rounded-xl bg-white shadow">
+                      <h3 className="text-center py-3 font-semibold bg-indigo-100">
+                        {nombreMes} {year}
+                      </h3>
 
-                      {/* Si hay citas este día → se muestran */}
-                      {citasPorDia[dia] &&
-                        citasPorDia[dia].map((cita) => (
-                          <div
-                            key={cita.idCita}
-                            className="absolute top-8 left-2 right-2 p-1.5 rounded bg-purple-50"
-                          >
-                            <p className="text-xs font-medium text-purple-600">
-                              {formatearHora(cita.fecha)}
-                            </p>
-                            <p className="text-[10px] text-purple-600">
-                              {cita.propiedad?.titulo}
-                            </p>
+                      {/* Encabezados días */}
+                      <div className="grid grid-cols-7 bg-indigo-50 text-xs font-semibold text-indigo-700">
+                        {["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"].map((d) => (
+                          <div key={d} className="py-1 text-center border-b">
+                            {d}
                           </div>
                         ))}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+                      </div>
 
-            {/* FIN GRID */}
+                      {/* Días */}
+                      <div className="grid grid-cols-7 text-xs">
+                        {diasMes.map((dia, idx) => (
+                          <div
+                            key={idx}
+                            className={`min-h-[70px] border p-1 relative ${dia ? "bg-white" : "bg-gray-100"
+                              }`}
+                          >
+                            {dia && (
+                              <>
+                                <span className="font-bold">{dia}</span>
+
+                                {/* Citas en ese día */}
+                                {citasPorMesDia[indexMes]?.[dia] &&
+                                  citasPorMesDia[indexMes][dia].map((cita) => (
+                                    <div key={cita.idCita} className="mt-1 p-1 bg-purple-100 rounded">
+                                      <p className="text-[10px] font-semibold text-purple-700">
+                                        {formatearHora(cita.fecha)}
+                                      </p>
+                                      <p className="text-[10px] text-purple-700 truncate">
+                                        {cita.propiedad?.titulo}
+                                      </p>
+                                    </div>
+                                  ))}
+                              </>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+            </div>
+            {/* FIN DEL CALENDARIO */}
+
           </div>
         </div>
       </div>
     </section>
-
   );
 };
 
 export default Citas;
+
 
 export const loaderCitas = async () => {
   const API = `http://localhost:3000/api/citas`;
@@ -169,7 +215,6 @@ export const loaderCitas = async () => {
     "Authorization": `Bearer ${token}`,
   };
 
-  // --- Pedimos ambas citas en paralelo ---
   const [resCreadas, resResponsable] = await Promise.all([
     fetch(`${API}/getCitasByUsuario/${idUsuario}`, { headers }),
     fetch(`${API}/getCitasByResponsable/${idUsuario}`, { headers })
@@ -183,7 +228,7 @@ export const loaderCitas = async () => {
     ...dataCreadas.data,
     ...dataResponsable.data
   ].reduce((acc, cita) => {
-    acc[cita.idCita] = cita; 
+    acc[cita.idCita] = cita;
     return acc;
   }, {});
 

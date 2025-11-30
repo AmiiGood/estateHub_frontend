@@ -26,10 +26,11 @@ export default (state, action) =>{
                 )
             }
         case DELETE_USER:
-            return{
-                ...state,
-                user:payload
-            }
+    return {
+        ...state,
+        users: state.users.filter(user => user.idUsuario !== payload)
+    }
+
 
             default:
                 return state;

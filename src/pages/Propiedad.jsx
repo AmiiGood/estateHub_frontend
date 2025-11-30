@@ -5,7 +5,7 @@ import { useLoaderData, Link } from "react-router-dom";
 const Propiedad = () => {
   const { propiedad } = useLoaderData();
 
- 
+
   const imagenPrincipal =
     propiedad?.imagenes?.[0]?.urlImagen ||
     "https://placehold.co/800x400?text=Sin+Imagen";
@@ -31,6 +31,13 @@ const Propiedad = () => {
             className="w-full h-full object-cover"
           />
         </div>
+        <Link
+          to={`/propiedades/${propiedad.idPropiedad}/gastos/crear`}
+          className="inline-block mb-6 ml-4 px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition"
+        >
+          Agregar gasto de mantenimiento
+        </Link>
+
 
         {/* Información general */}
         <h1 className="text-3xl font-bold mb-2">{propiedad.titulo}</h1>
@@ -52,7 +59,7 @@ const Propiedad = () => {
           <div className="bg-[#182230] p-4 rounded-xl shadow">
             <p className="text-gray-400 text-sm">Tipo de propiedad</p>
             <p className="text-white font-semibold">
-              {propiedad.tipo || "No especificado"}
+              {propiedad.tipoPropiedad || "No especificado"}
             </p>
           </div>
 
@@ -66,14 +73,14 @@ const Propiedad = () => {
           <div className="bg-[#182230] p-4 rounded-xl shadow">
             <p className="text-gray-400 text-sm">Superficie</p>
             <p className="text-white font-semibold">
-              {propiedad.superficie ? propiedad.superficie + " m²" : "No especificado"}
+              {propiedad.metrosCuadrados ? propiedad.metrosCuadrados + " m²" : "No especificado"}
             </p>
           </div>
 
           <div className="bg-[#182230] p-4 rounded-xl shadow">
             <p className="text-gray-400 text-sm">Habitaciones</p>
             <p className="text-white font-semibold">
-              {propiedad.habitaciones || "No especificado"}
+              {propiedad.numHabitaciones || "No especificado"}
             </p>
           </div>
         </div>
