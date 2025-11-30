@@ -5,6 +5,7 @@ const AuthContext = createContext(null);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const SUPER_ADMIN_EMAIL = "alexis@gmail.com";
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
@@ -96,7 +97,7 @@ export const AuthProvider = ({ children }) => {
       logout,
       isAuthenticated, 
       loading,
-      getIdUsuario 
+      getIdUsuario
     }}>
       {children}
     </AuthContext.Provider>

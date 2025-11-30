@@ -3,26 +3,26 @@
  */
 
 import React, { useReducer } from 'react'
-import PropReducer from './PropReducer';
 import axios from 'axios';
-import PropContext from './PropContext';
-import { POST_PROP } from '../types';
+import { POST_USER } from '../types';
+import UsuarioReducer from './UsuarioReducer';
+import UsuarioContext from './UsuarioContext';
 
 
-const PropState = (propss) => {
+const UsuarioState = (userss) => {
 
     //Definimos el estado inicial
     const initialState = {
-  props: [],
-  selectedProp: null
+  users: [],
+  selectedUser: null
 };
 
 //x-api-key: reqres-free-v1
     //Definimos el useReducer para manejar el estado de la aplicación.
-    const [state, dispatch] = useReducer(PropReducer, initialState);
+    const [state, dispatch] = useReducer(UsuarioReducer, initialState);
 
     
-    const postProp = async (propiedadData) => {
+    const postUser = async (usuarioData) => {
   try {
     const storedUser = localStorage.getItem("user");
     const userData = storedUser ? JSON.parse(storedUser) : null;
@@ -34,8 +34,8 @@ const PropState = (propss) => {
     }
 
     const res = await axios.post(
-      "http://localhost:3000/api/propiedades/postPropiedad",
-      { propiedad: propiedadData },
+      "http://localhost:3000/api/usuarios/postUsuario",
+      { usuario: usuarioData },
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -44,20 +44,20 @@ const PropState = (propss) => {
     );
 
     dispatch({
-      type: POST_PROP,
+      type: POST_USER,
       payload: res.data.data,
     });
 
     return res;
   } catch (error) {
-    console.error("Error al registrar propiedades:", error);
+    console.error("Error al registrar usuarios:", error);
     throw error;
   }
 };
 
 
  // Función para obtener una propiedad específica
-    const getProp = async (idPropiedad) => {
+    const getUser = async (idUsuario) => {
     try {
         const storedUser = localStorage.getItem("user");
         const userData = storedUser ? JSON.parse(storedUser) : null;
@@ -69,7 +69,7 @@ const PropState = (propss) => {
         }
 
         const res = await axios.get(
-            `http://localhost:3000/api/propiedades/getPropiedad/${idPropiedad}`,
+            `http://localhost:3000/api/usuarios/getUsuario/${idUsuario}`,
             {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -77,22 +77,22 @@ const PropState = (propss) => {
             }
         );
 
-        console.log("Datos recibidos de la API:", res.data.data); // ← Agregar este console.log
+        console.log("Datos recibidos de la API:", res.data.data); 
 
         dispatch({
-            type: 'GET_PROP',
+            type: 'GET_USER',
             payload: res.data.data,
         });
 
         return res;
     } catch (error) {
-        console.error("Error al obtener propiedad:", error);
+        console.error("Error al obtener el usuario:", error);
         throw error;
     }
 };
 
 
-const putProp = async (propiedadData) => {
+const putUser = async (usuarioData) => {
     try {
         const storedUser = localStorage.getItem("user");
         const userData = storedUser ? JSON.parse(storedUser) : null;
@@ -104,8 +104,8 @@ const putProp = async (propiedadData) => {
         }
 
         const res = await axios.put(
-            'http://localhost:3000/api/propiedades/putPropiedad',
-            { propiedad: propiedadData },
+            'http://localhost:3000/api/usuarios/putUsuario',
+            { propiedad: usuarioData },
             {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -122,19 +122,19 @@ const putProp = async (propiedadData) => {
         
         return res; 
     } catch (error) {
-        console.error("Error al actualizar propiedad:", error);
+        console.error("Error al actualizar usuario:", error);
         throw error;
     }
 }
 
-const deleteProp = async (id) =>{
-        const res = await axios.delete('http://localhost:3000/api/propiedades/deletePropiedad '+ id,
+const deleteUser = async (id) =>{
+        const res = await axios.delete('http://localhost:3000/api/usuarios/deleteUsuario '+ id,
             {headers: {'x-api-key': 'reqres-free-v1'}
         });
         console.log("Código de respuesta:", res.status);
         //Pasamos los datos al reducer
         dispatch({
-                type:POST_PROP,
+                type:POST_USER,
                 payload: res.data.data
             })
         return res; 
@@ -147,18 +147,18 @@ const deleteProp = async (id) =>{
     
 
   return (
-    <PropContext.Provider value={{
-    props: state.props,
-    selectedProp: state.selectedProp,
-    postProp,
-    putProp,
-    deleteProp,
-    getProp
+    <UsuarioContext.Provider value={{
+    users: state.users,
+    selectedUser: state.selectedUser,
+    postUser,
+    putUser,
+    deleteUser,
+    getUser
     }}>
-        {propss.children}
-    </PropContext.Provider>
+        {userss.children}
+    </UsuarioContext.Provider>
 
   )
 }
 
-export default PropState
+export default UsuarioState
