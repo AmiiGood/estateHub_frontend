@@ -10,17 +10,12 @@ import UsuarioContext from './UsuarioContext';
 
 
 const UsuarioState = (userss) => {
-
-  //Definimos el estado inicial
   const initialState = {
     users: [],
     selectedUser: null
   };
 
-  //x-api-key: reqres-free-v1
-  //Definimos el useReducer para manejar el estado de la aplicación.
   const [state, dispatch] = useReducer(UsuarioReducer, initialState);
-
 
   const postUser = async (usuarioData) => {
     try {
@@ -55,8 +50,6 @@ const UsuarioState = (userss) => {
     }
   };
 
-
-  // Función para obtener una propiedad específica
   const getUser = async (idUsuario) => {
     try {
       const storedUser = localStorage.getItem("user");
@@ -90,7 +83,6 @@ const UsuarioState = (userss) => {
       throw error;
     }
   };
-
 
   const putUser = async (usuarioData) => {
     try {
@@ -127,6 +119,48 @@ const UsuarioState = (userss) => {
     }
   }
 
+  // Nueva función para cambiar el estado activo/inactivo
+  const toggleUserStatus = async (idUsuario, nuevoEstado) => {
+    try {
+      const storedUser = localStorage.getItem("user");
+      const userData = storedUser ? JSON.parse(storedUser) : null;
+      const token = userData?.token;
+
+      if (!token) {
+        console.error("No existe token en localStorage");
+        throw new Error("No autorizado");
+      }
+
+      // Solo enviamos el idUsuario y el campo activo
+      const usuarioData = {
+        idUsuario: idUsuario,
+        activo: nuevoEstado
+      };
+
+      const res = await axios.put(
+        'http://localhost:3000/api/usuarios/putUsuario',
+        { usuario: usuarioData },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      console.log("Usuario actualizado:", res.data);
+
+      dispatch({
+        type: PUT_USER,
+        payload: res.data.data
+      });
+
+      return res;
+    } catch (error) {
+      console.error("Error al cambiar estado del usuario:", error);
+      throw error;
+    }
+  };
+
   const deleteUser = async (id) => {
     try {
       const storedUser = localStorage.getItem("user");
@@ -144,7 +178,7 @@ const UsuarioState = (userss) => {
           },
         });
       console.log("Código de respuesta:", res.status);
-      //Pasamos los datos al reducer
+
       dispatch({
         type: DELETE_USER,
         payload: id
@@ -152,54 +186,12 @@ const UsuarioState = (userss) => {
 
       return res;
     } catch (error) {
-      console.error("Error al actualizar usuario:", error);
+      console.error("Error al eliminar usuario:", error);
       throw error;
     }
   }
 
-  const reactivateUser = async (id) => {
-    try {
-      const storedUser = localStorage.getItem("user");
-      const userData = storedUser ? JSON.parse(storedUser) : null;
-      const token = userData?.token;
-
-      const res = await axios.put(
-        "http://localhost:3000/api/usuarios/putUsuario",
-        {
-          usuario: {
-            idUsuario: id,
-            activo: 1
-          }
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      dispatch({
-        type: PUT_USER,
-        payload: res.data.data
-      });
-
-      return res;
-
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-
-
-
-
-
-
-
-
-
-
+  // Eliminamos la función reactivateUser ya que ahora usamos toggleUserStatus
 
   return (
     <UsuarioContext.Provider value={{
@@ -209,12 +201,11 @@ const UsuarioState = (userss) => {
       putUser,
       deleteUser,
       getUser,
-      reactivateUser
+      toggleUserStatus // Exportamos la nueva función
     }}>
       {userss.children}
     </UsuarioContext.Provider>
-
   )
 }
 
-export default UsuarioState
+export default UsuarioState;
