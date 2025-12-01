@@ -1,13 +1,59 @@
-import React from "react";
+import React, { useState } from "react";
 import { useLoaderData, Link } from "react-router-dom";
 
 const Contrato = () => {
   const { contrato } = useLoaderData();
+  const [viewMode, setViewMode] = useState("google"); // google, direct, download
 
   const estatusTexto = contrato.estatus ? "Activo" : "Inactivo";
   const estatusColor = contrato.estatus
     ? "bg-green-500/20 text-green-400 border-green-500/30"
     : "bg-red-500/20 text-red-400 border-red-500/30";
+
+  // Función para obtener la URL correcta del documento
+  const getDocumentUrl = () => {
+    if (!contrato.urlDoc) return null;
+
+    // Si la URL ya es de Cloudinary con resource_type=raw
+    if (contrato.urlDoc.includes("cloudinary.com")) {
+      // Asegurarnos de que tenga el resource_type correcto para PDFs
+      let url = contrato.urlDoc;
+
+      // Si no tiene fl_attachment, agregarlo para forzar descarga
+      if (viewMode === "download" && !url.includes("fl_attachment")) {
+        // Insertar fl_attachment antes del nombre del archivo
+        const parts = url.split("/upload/");
+        if (parts.length === 2) {
+          url = `${parts[0]}/upload/fl_attachment/${parts[1]}`;
+        }
+      }
+
+      return url;
+    }
+
+    return contrato.urlDoc;
+  };
+
+  const documentUrl = getDocumentUrl();
+
+  const handleDescargar = () => {
+    if (documentUrl) {
+      // Crear un enlace temporal para descargar
+      const link = document.createElement("a");
+      link.href = documentUrl;
+      link.download = `contrato_${contrato.idContrato}.pdf`;
+      link.target = "_blank";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
+  const handleVerNuevaPestana = () => {
+    if (documentUrl) {
+      window.open(documentUrl, "_blank", "noopener,noreferrer");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#101828] via-[#182230] to-[#0C111D] text-white py-10 px-6">
@@ -104,32 +150,73 @@ const Contrato = () => {
           </div>
 
           {/* Documento del contrato */}
-          {contrato.urlDoc && (
+          {documentUrl && (
             <div className="bg-[#182230] p-6 rounded-2xl border border-white/5">
-              <h2 className="text-xl font-semibold mb-3">
-                Documento del Contrato
-              </h2>
-              <a
-                href={contrato.urlDoc}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-4 py-2 bg-[#1F2A37] hover:bg-[#273445] rounded-lg transition text-sm"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold">
+                  Documento del Contrato
+                </h2>
+
+                {/* Selector de modo de visualización */}
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setViewMode("google")}
+                    className={`px-3 py-1 text-xs rounded ${
+                      viewMode === "google"
+                        ? "bg-blue-600 text-white"
+                        : "bg-gray-700 text-gray-300"
+                    }`}
+                  >
+                    Google Viewer
+                  </button>
+                  <button
+                    onClick={() => setViewMode("direct")}
+                    className={`px-3 py-1 text-xs rounded ${
+                      viewMode === "direct"
+                        ? "bg-blue-600 text-white"
+                        : "bg-gray-700 text-gray-300"
+                    }`}
+                  >
+                    Directo
+                  </button>
+                </div>
+              </div>
+
+              {/* Visor de PDF */}
+              <div className="bg-white rounded-lg overflow-hidden mb-4">
+                {viewMode === "google" ? (
+                  <iframe
+                    src={`https://docs.google.com/viewer?url=${encodeURIComponent(
+                      documentUrl
+                    )}&embedded=true`}
+                    className="w-full h-96"
+                    title="Documento del Contrato"
                   />
-                </svg>
-                Ver documento
-              </a>
+                ) : (
+                  <iframe
+                    src={`${documentUrl}#toolbar=0&navpanes=0&scrollbar=0`}
+                    className="w-full h-96"
+                    title="Documento del Contrato"
+                  />
+                )}
+              </div>
+
+              {/* Información del documento */}
+              <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3 mb-4">
+                <p className="text-blue-300 text-xs">
+                  <strong>Nota:</strong> Si el documento no se visualiza
+                  correctamente, intenta cambiar el modo de visualización o
+                  descárgalo directamente.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {!documentUrl && (
+            <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
+              <p className="text-yellow-300 text-sm">
+                No hay documento disponible para este contrato
+              </p>
             </div>
           )}
         </div>

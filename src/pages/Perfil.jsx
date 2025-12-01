@@ -39,11 +39,15 @@ const Perfil = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#101828] via-[#182230] to-[#0C111D] text-white">
-      <div className="max-w-6xl mx-auto px-6 py-12">
-        {/* Encabezado */}
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-10">
-          <h1 className="text-3xl md:text-4xl font-bold">Mi Perfil</h1>
+    <section className="py-24 bg-gradient-to-br from-[#101828] via-[#182230] to-[#0C111D] text-white">
+      <div className="max-w-5xl mx-auto px-6 lg:px-8">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-bold mb-4">
+            Mi <span className="text-[#D0D5DD]">Perfil</span>
+          </h2>
+          <p className="text-[#98A2B3] text-lg">
+            Gestiona tu información personal
+          </p>
         </div>
 
         {/* Tarjeta de Información del Usuario */}
@@ -52,18 +56,18 @@ const Perfil = () => {
             {/* Avatar */}
             <div className="flex-shrink-0">
               <div className="w-32 h-32 bg-gradient-to-br from-[#101828] to-[#182230] rounded-full flex items-center justify-center text-white text-4xl font-bold">
-                {usuarioData.nombre.charAt(0).toUpperCase()}
-                {usuarioData.apellidoPaterno.charAt(0).toUpperCase()}
+                {usuarioData.nombre?.charAt(0).toUpperCase() || "U"}
+                {usuarioData.apellidoPaterno?.charAt(0).toUpperCase() || "S"}
               </div>
             </div>
 
             {/* Información */}
             <div className="flex-1 space-y-4">
               <div>
-                <h2 className="text-3xl font-bold text-[#182230]">
+                <h3 className="text-3xl font-bold text-[#182230]">
                   {usuarioData.nombre} {usuarioData.apellidoPaterno}{" "}
                   {usuarioData.apellidoMaterno}
-                </h2>
+                </h3>
                 <p className="text-[#475467] text-lg">{usuarioData.email}</p>
               </div>
 
@@ -105,24 +109,24 @@ const Perfil = () => {
                 </div>
               </div>
 
-              <div className="pt-4">
+              <div className="pt-4 flex gap-4">
                 <button
                   onClick={() => setShowForm(!showForm)}
-                  className="px-6 py-3 bg-gradient-to-r from-[#101828] to-[#182230] text-white font-semibold rounded-xl hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+                  className="px-8 py-3 bg-gradient-to-r from-[#101828] to-[#182230] text-white font-semibold rounded-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
                 >
                   {showForm ? "Ocultar Formulario" : "Editar Perfil"}
                 </button>
               </div>
             </div>
           </div>
-
-          {/* Formulario de Edición */}
-          {showForm && (
-            <FormPer usuarioActual={usuarioData} onClose={handleCloseForm} />
-          )}
         </div>
+
+        {/* Formulario de Edición - Aparece debajo */}
+        {showForm && (
+          <FormPer usuarioActual={usuarioData} onClose={handleCloseForm} />
+        )}
       </div>
-    </div>
+    </section>
   );
 };
 

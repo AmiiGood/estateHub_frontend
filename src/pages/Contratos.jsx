@@ -1,10 +1,67 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useLoaderData } from "react-router-dom";
 import { Collapse, Ripple, initTWE } from "tw-elements";
 
 const Contratos = () => {
   const { propiedades } = useLoaderData();
   initTWE({ Collapse, Ripple });
+
+  const [mostrarConfirmacion, setMostrarConfirmacion] = useState(false);
+  const [mostrarExito, setMostrarExito] = useState(false);
+  const [mostrarError, setMostrarError] = useState(false);
+  const [mensajeError, setMensajeError] = useState("");
+  const [contratoAEliminar, setContratoAEliminar] = useState(null);
+  const [procesando, setProcesando] = useState(false);
+
+  const handleEliminarContrato = (idContrato) => {
+    setContratoAEliminar(idContrato);
+    setMostrarConfirmacion(true);
+  };
+
+  const confirmarEliminacion = async () => {
+    setMostrarConfirmacion(false);
+    setProcesando(true);
+
+    try {
+      const storedUser = localStorage.getItem("user");
+      const userData = storedUser ? JSON.parse(storedUser) : null;
+      const token = userData?.token;
+
+      if (!token) {
+        throw new Error("No autorizado");
+      }
+
+      const response = await fetch(
+        `http://localhost:3000/api/contratos/putEstatusContrato/${contratoAEliminar}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ estatus: false }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Error al desactivar el contrato");
+      }
+
+      setMostrarExito(true);
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
+    } catch (error) {
+      console.error("Error al eliminar contrato:", error);
+      setMensajeError(
+        error.message || "Hubo un error al desactivar el contrato"
+      );
+      setMostrarError(true);
+    } finally {
+      setProcesando(false);
+      setContratoAEliminar(null);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#101828] via-[#182230] to-[#0C111D] text-white relative">
@@ -94,12 +151,17 @@ const Contratos = () => {
                         >
                           + Contrato
                         </Link>
-                        <Link
-                          to={`/propiedad/${prop.idPropiedad}`}
-                          className="px-4 py-2 rounded-lg bg-[#1F2A37] hover:bg-[#273445] text-white text-sm shadow-md transition flex-1 text-center"
-                        >
-                          Ver Propiedad
-                        </Link>
+                        {tieneContratos && contratoActivo && (
+                          <button
+                            onClick={() =>
+                              handleEliminarContrato(contratoActivo.idContrato)
+                            }
+                            disabled={procesando}
+                            className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm shadow-md transition flex-1 text-center font-semibold disabled:opacity-50"
+                          >
+                            Desactivar
+                          </button>
+                        )}
                       </div>
 
                       {tieneContratos && (
@@ -136,6 +198,129 @@ const Contratos = () => {
           )}
         </div>
       </div>
+
+      {/* Modal de Confirmación */}
+      {mostrarConfirmacion && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4">
+          <div className="bg-white text-[#101828] rounded-2xl p-8 max-w-md w-full shadow-2xl">
+            <h3 className="text-2xl font-bold mb-4">Confirmar Desactivación</h3>
+            <p className="text-gray-600 mb-6">
+              ¿Estás seguro de que deseas desactivar este contrato? Esta acción
+              cambiará su estatus a inactivo.
+            </p>
+            <div className="flex gap-4">
+              <button
+                onClick={() => {
+                  setMostrarConfirmacion(false);
+                  setContratoAEliminar(null);
+                }}
+                className="flex-1 px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmarEliminacion}
+                className="flex-1 px-6 py-3 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition"
+              >
+                Desactivar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Alerta de Éxito */}
+      {mostrarExito && (
+        <div className="fixed top-4 right-4 z-50 max-w-md">
+          <div
+            className="bg-teal-50 border-t-2 border-teal-500 rounded-lg p-4"
+            role="alert"
+          >
+            <div className="flex">
+              <div className="shrink-0">
+                <span className="inline-flex justify-center items-center size-8 rounded-full border-4 border-teal-100 bg-teal-200 text-teal-800">
+                  <svg
+                    className="shrink-0 size-4"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path>
+                    <path d="m9 12 2 2 4-4"></path>
+                  </svg>
+                </span>
+              </div>
+              <div className="ms-3">
+                <h3 className="text-gray-800 font-semibold">
+                  ¡Operación exitosa!
+                </h3>
+                <p className="text-sm text-gray-700">
+                  El contrato se ha desactivado correctamente. Recargando...
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Alerta de Error */}
+      {mostrarError && (
+        <div className="fixed top-4 right-4 z-50 max-w-md">
+          <div className="bg-red-50 border-s-4 border-red-500 p-4" role="alert">
+            <div className="flex">
+              <div className="shrink-0">
+                <span className="inline-flex justify-center items-center size-8 rounded-full border-4 border-red-100 bg-red-200 text-red-800">
+                  <svg
+                    className="shrink-0 size-4"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M18 6 6 18"></path>
+                    <path d="m6 6 12 12"></path>
+                  </svg>
+                </span>
+              </div>
+              <div className="ms-3 flex-1">
+                <h3 className="text-gray-800 font-semibold">Error!</h3>
+                <p className="text-sm text-gray-700">{mensajeError}</p>
+              </div>
+              <button
+                onClick={() => setMostrarError(false)}
+                className="ml-2 text-gray-400 hover:text-gray-600 self-start"
+              >
+                <svg
+                  className="size-4"
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M18 6 6 18"></path>
+                  <path d="m6 6 12 12"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -159,7 +344,6 @@ export const loaderContratos = async ({ request }) => {
   };
 
   try {
-    // Obtener propiedades del usuario
     const res = await fetch(`${API}/getPropiedadesByUsuario/${idUsuario}`, {
       headers,
     });
@@ -171,7 +355,6 @@ export const loaderContratos = async ({ request }) => {
     const data = await res.json();
     const propiedades = data.data || [];
 
-    // Para cada propiedad, obtener sus contratos
     const propiedadesConContratos = await Promise.all(
       propiedades.map(async (prop) => {
         try {
