@@ -38,9 +38,6 @@ const Home = () => {
               <Link to="/propiedades" className="px-8 py-4 bg-gradient-to-r from-[#D0D5DD] to-[#E4E7EC] text-[#101828] font-semibold rounded-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 hover:scale-105">
                 Explorar Propiedades
               </Link>
-              <button className="px-8 py-4 border-2 border-[#667085] text-white font-semibold rounded-xl hover:bg-white/10 transition-all duration-300">
-                Ver Demo
-              </button>
             </div>
           </div>
         </div>
@@ -155,12 +152,9 @@ const Home = () => {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <button className="px-8 py-4 bg-gradient-to-r from-[#101828] to-[#182230] text-white font-semibold rounded-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
-              Crear Cuenta Gratis
-            </button>
-            <button className="px-8 py-4 border-2 border-[#E4E7EC] text-[#101828] font-semibold rounded-xl hover:border-[#D0D5DD] hover:bg-[#F8F9FA] transition-all duration-300">
-              Programar Demo
-            </button>
+            <Link to="/propiedades" className="px-8 py-4 bg-gradient-to-r from-[#D0D5DD] to-[#E4E7EC] text-[#101828] font-semibold rounded-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 hover:scale-105">
+              Explorar citas programadas
+            </Link>
           </div>
         </div>
       </section>

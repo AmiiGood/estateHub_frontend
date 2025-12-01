@@ -22,9 +22,8 @@ const FormProp = () => {
   const [loading, setLoading] = useState(false);
   const hasLoaded = useRef(false);
 
-  console.log("idPropiedad desde useParams:", id);
-  console.log("isEditing:", isEditing);
-  console.log("selectedProp:", selectedProp);
+  // Estado para alertas (solo visual)
+  const [alert, setAlert] = useState(null);
 
   const [formData, setFormData] = useState({
     titulo: "",
@@ -62,37 +61,27 @@ const FormProp = () => {
 
   const sanitizeNumber = (value, allowFloat = false) => {
     if (!value) return "";
-
-    // Evitar signos negativos
     value = value.replace(/-/g, "");
-
-    // Permitir solo números (y opcionalmente decimales)
     const regex = allowFloat ? /[^0-9.]/g : /[^0-9]/g;
     value = value.replace(regex, "");
-
-    // Evitar múltiples puntos decimales
     if (allowFloat) {
       const parts = value.split(".");
       if (parts.length > 2) {
         value = parts[0] + "." + parts.slice(1).join("");
       }
     }
-
     return value;
   };
-
 
   const sanitizeText = (value) => {
     if (!value) return "";
     return value
-      .replace(/<[^>]*>?/gm, "") // Evita scripts/HTML
-      .trimStart(); // Evita espacios al inicio
+      .replace(/<[^>]*>?/gm, "")
+      .trimStart();
   };
-
 
   const handleChange = (e) => {
     const { name, type, value, checked } = e.target;
-    // Campos numéricos
     const numericFields = [
       "precioVenta",
       "precioRenta",
@@ -105,7 +94,6 @@ const FormProp = () => {
       "longitud"
     ];
 
-    // Sanitización de checkbox
     if (type === "checkbox") {
       return setFormData({
         ...formData,
@@ -113,7 +101,6 @@ const FormProp = () => {
       });
     }
 
-    // Sanitizar números
     if (numericFields.includes(name)) {
       const sanitized = sanitizeNumber(value, true);
       return setFormData({
@@ -122,9 +109,7 @@ const FormProp = () => {
       });
     }
 
-    // Sanitizar texto
     const sanitizedText = sanitizeText(value);
-
     setFormData({
       ...formData,
       [name]: sanitizedText,
@@ -135,10 +120,8 @@ const FormProp = () => {
     setImagenes([...e.target.files]);
   };
 
-  // Cargar datos cuando es edición
   useEffect(() => {
     const loadPropiedadData = async () => {
-      // Evitar cargar múltiples veces
       if (id && !hasLoaded.current) {
         try {
           setLoading(true);
@@ -147,23 +130,22 @@ const FormProp = () => {
           await getProp(id);
         } catch (error) {
           console.error("Error al cargar propiedad:", error);
-          alert("Error al cargar los datos de la propiedad");
+          // Ejemplo de alerta de error
+          setAlert({
+            type: "error",
+            title: "Error",
+            message: "Error al cargar los datos de la propiedad"
+          });
         } finally {
           setLoading(false);
         }
       }
     };
-
     loadPropiedadData();
   }, [id, getProp]);
 
-
-  // Actualizar formData cuando selectedProp cambie
   useEffect(() => {
     if (selectedProp && isEditing && hasLoaded.current) {
-      console.log("SelectedProp recibido:", selectedProp);
-
-
       const newFormData = {
         titulo: selectedProp.titulo || "",
         descripcion: selectedProp.descripcion || "",
@@ -204,19 +186,27 @@ const FormProp = () => {
     }
   }, [selectedProp, isEditing]);
 
-  // Resetear hasLoaded
   useEffect(() => {
     return () => {
       hasLoaded.current = false;
     };
   }, [id]);
 
+  // Auto-ocultar alertas después de 3 segundos
+  useEffect(() => {
+    if (alert) {
+      const timer = setTimeout(() => {
+        setAlert(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [alert]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     const idUsuario = getIdUsuario();
-    console.log("ID de usuario:", idUsuario);
 
     try {
       let response;
@@ -226,7 +216,6 @@ const FormProp = () => {
           idPropiedad: parseInt(id),
           idUsuario: parseInt(idUsuario),
           ...formData,
-          // Convertir strings vacíos a null para números
           precioVenta: formData.precioVenta ? parseFloat(formData.precioVenta) : null,
           precioRenta: formData.precioRenta ? parseFloat(formData.precioRenta) : null,
           numHabitaciones: formData.numHabitaciones ? parseInt(formData.numHabitaciones) : null,
@@ -236,13 +225,18 @@ const FormProp = () => {
           plantas: formData.plantas ? parseInt(formData.plantas) : null,
         };
 
-        console.log("Propiedad a actualizar:", propiedadData);
         response = await putProp(propiedadData);
+        // Ejemplo de alerta de éxito
+        setAlert({
+          type: "success",
+          title: "Propiedad actualizada",
+          message: "La propiedad se actualizó correctamente"
+        });
 
-        alert("Propiedad actualizada correctamente.");
-        navigate('/propiedades');
+        setTimeout(() => {
+          navigate('/propiedades');
+        }, 1500);
       } else {
-        // Modo creación
         const propiedadData = {
           idUsuario: parseInt(idUsuario),
           ...formData,
@@ -255,32 +249,52 @@ const FormProp = () => {
           plantas: formData.plantas ? parseInt(formData.plantas) : null,
         };
 
-        console.log("Propiedad a crear:", propiedadData);
         response = await postProp(propiedadData);
-
         const propiedadId = response?.data?.data?.idPropiedad;
-        console.log("ID de propiedad creada:", propiedadId);
 
         if (propiedadId && imagenes.length > 0) {
           await subirImagenes(propiedadId, imagenes);
-          alert("Propiedad registrada e imágenes subidas correctamente.");
+          // Ejemplo de alerta de éxito
+          setAlert({
+            type: "success",
+            title: "Propiedad registrada",
+            message: "Propiedad registrada e imágenes subidas correctamente"
+          });
         } else if (propiedadId) {
-          alert("Propiedad registrada correctamente.");
+          // Ejemplo de alerta de éxito
+          setAlert({
+            type: "success",
+            title: "Propiedad registrada",
+            message: "La propiedad se registró correctamente"
+          });
         } else {
-          alert("Propiedad registrada, pero no se pudo obtener el ID para subir imágenes.");
+          // Ejemplo de alerta de error
+          setAlert({
+            type: "error",
+            title: "Error",
+            message: "Propiedad registrada, pero no se pudo obtener el ID para subir imágenes"
+          });
         }
-        navigate('/propiedades');
+
+        setTimeout(() => {
+          navigate('/propiedades');
+        }, 1500);
       }
 
     } catch (error) {
       console.error(`Error al ${isEditing ? 'actualizar' : 'registrar'} propiedad:`, error);
-      alert(`Hubo un error al ${isEditing ? 'actualizar' : 'registrar'} la propiedad.`);
+      // Ejemplo de alerta de error
+      setAlert({
+        type: "error",
+        title: "Error",
+        message: `Hubo un error al ${isEditing ? 'actualizar' : 'registrar'} la propiedad`
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  if (loading) {
+  if (loading && !isEditing) {
     return (
       <section className="py-24 bg-gradient-to-br from-[#101828] via-[#182230] to-[#0C111D] text-white">
         <div className="max-w-5xl mx-auto px-6 lg:px-8 text-center">
@@ -289,8 +303,6 @@ const FormProp = () => {
       </section>
     );
   }
-
-
 
   const subirImagenes = async (propiedadId, archivos) => {
     try {
@@ -303,7 +315,6 @@ const FormProp = () => {
       }
 
       const formData = new FormData();
-
       archivos.forEach((archivo) => {
         formData.append("fotos", archivo);
       });
@@ -324,7 +335,6 @@ const FormProp = () => {
       }
 
       const result = await response.json();
-      console.log("Imágenes subidas:", result);
       return result;
 
     } catch (error) {
@@ -333,296 +343,601 @@ const FormProp = () => {
     }
   };
 
+  // Opciones para selects
+  const tipoPropiedadOptions = [
+    { value: "residencial", label: "Residencial" },
+    { value: "comercial", label: "Comercial" },
+    { value: "industrial", label: "Industrial" },
+    { value: "terreno", label: "Terreno" },
+    { value: "oficina", label: "Oficina" },
+  ];
+
+  const estatusOptions = [
+    { value: "disponible", label: "Disponible" },
+    { value: "vendido", label: "Vendido" },
+    { value: "rentado", label: "Rentado" },
+    { value: "proceso", label: "En proceso" },
+    { value: "reservado", label: "Reservado" },
+  ];
+
+  const amenidades = [
+    { name: "residencial", label: "Residencial" },
+    { name: "jardin", label: "Jardín" },
+    { name: "alberca", label: "Alberca" },
+    { name: "sotano", label: "Sótano" },
+    { name: "terraza", label: "Terraza" },
+    { name: "cuartoServicio", label: "Cuarto de Servicio" },
+    { name: "muebles", label: "Amueblado" },
+    { name: "credito", label: "Crédito Disponible" },
+    { name: "publicadoEcommerce", label: "Publicado en E-commerce" },
+  ];
 
   return (
-    /**
-    <div
-  class="!visible hidden text-center"
-  id="collapseExample"
-  data-twe-collapse-item>
-   */
-    <section className="py-24 bg-gradient-to-br from-[#101828] via-[#182230] to-[#0C111D] text-white" >
+    <section className="py-24 bg-gradient-to-br from-[#101828] via-[#182230] to-[#0C111D] text-white">
+      {/* CONTENEDOR PRINCIPAL DE ALERTAS - Posicionado fijo */}
+      <div className="fixed top-4 right-4 z-50 max-w-md w-full">
+        {/* ALERTA DE ÉXITO */}
+        {alert?.type === "success" && (
+          <div className="bg-teal-50 border-t-2 border-teal-500 rounded-lg p-4 mb-3 shadow-lg animate-fade-in">
+            <div className="flex items-start">
+              <div className="shrink-0">
+                <span className="inline-flex justify-center items-center size-8 rounded-full border-4 border-teal-100 bg-teal-200 text-teal-800">
+                  <svg className="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path>
+                    <path d="m9 12 2 2 4-4"></path>
+                  </svg>
+                </span>
+              </div>
+              <div className="ms-3">
+                <h3 className="text-gray-800 font-semibold">
+                  {alert.title}
+                </h3>
+                <p className="text-sm text-gray-700">
+                  {alert.message}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ALERTA DE ERROR */}
+        {alert?.type === "error" && (
+          <div className="bg-red-50 border-s-4 border-red-500 p-4 mb-3 shadow-lg animate-fade-in">
+            <div className="flex items-start">
+              <div className="shrink-0">
+                <span className="inline-flex justify-center items-center size-8 rounded-full border-4 border-red-100 bg-red-200 text-red-800">
+                  <svg className="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M18 6 6 18"></path>
+                    <path d="m6 6 12 12"></path>
+                  </svg>
+                </span>
+              </div>
+              <div className="ms-3">
+                <h3 className="text-gray-800 font-semibold">
+                  Error
+                </h3>
+                <p className="text-sm text-gray-700">
+                  {alert.message || 'No se pudo completar la acción.'}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
       <div className="max-w-5xl mx-auto px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
             Registro de <span className="text-[#D0D5DD]">Propiedad</span>
           </h2>
           <p className="text-[#98A2B3] text-lg">
-            Completa la información para agregar una nueva propiedad a la
-            plataforma.
+            Completa la información para agregar una nueva propiedad a la plataforma.
           </p>
         </div>
 
         <form
           onSubmit={handleSubmit}
-          className="bg-white text-[#101828] rounded-2xl shadow-2xl p-10 space-y-8"
+          className="bg-white text-[#101828] rounded-2xl shadow-2xl p-8 md:p-10 space-y-10"
         >
-          {/* Datos Generales */}
-          <div>
-            <h3 className="text-2xl font-semibold mb-6 text-[#182230]">
+          {/* DATOS GENERALES */}
+          <div className="space-y-6">
+            <h3 className="text-2xl font-semibold text-[#182230] pb-3">
               Información General
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <input
-                type="text"
-                name="titulo"
-                placeholder="Título"
-                value={formData.titulo}
-                onChange={handleChange}
-                className="input-style"
-              />
-              <input
-                type="text"
-                name="descripcion"
-                placeholder="Descripción"
-                value={formData.descripcion}
-                onChange={handleChange}
-                className="input-style"
-              />
-              <input
-                type="text"
-                name="direccion"
-                placeholder="Dirección"
-                value={formData.direccion}
-                onChange={handleChange}
-                className="input-style"
-              />
-              <input
-                type="text"
-                name="colonia"
-                placeholder="Colonia"
-                value={formData.colonia}
-                onChange={handleChange}
-                className="input-style"
-              />
-              <input
-                type="text"
-                name="ciudad"
-                placeholder="Ciudad"
-                value={formData.ciudad}
-                onChange={handleChange}
-                className="input-style"
-              />
-              <input
-                type="text"
-                name="estado"
-                placeholder="Estado"
-                value={formData.estado}
-                onChange={handleChange}
-                className="input-style"
-              />
-              <input
-                type="text"
-                name="codigoPostal"
-                placeholder="Código Postal"
-                value={formData.codigoPostal}
-                onChange={handleChange}
-                className="input-style"
-              />
-              <input
-                type="date"
-                name="fechaRegistro"
-                placeholder="Fecha de Registro"
-                value={formData.fechaRegistro}
-                onChange={handleChange}
-                className="input-style"
-              />
+              {/* Título */}
+              <div className="space-y-2">
+                <label htmlFor="titulo" className="block text-sm font-medium text-gray-700">
+                  Título de la Propiedad *
+                </label>
+                <input
+                  type="text"
+                  id="titulo"
+                  name="titulo"
+                  placeholder="Ej. Casa moderna en zona residencial"
+                  value={formData.titulo}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#101828] focus:border-transparent transition"
+                  required
+                />
+              </div>
+
+              {/* Descripción */}
+              <div className="space-y-2">
+                <label htmlFor="descripcion" className="block text-sm font-medium text-gray-700">
+                  Descripción *
+                </label>
+                <textarea
+                  id="descripcion"
+                  name="descripcion"
+                  placeholder="Describe las características principales de la propiedad..."
+                  value={formData.descripcion}
+                  onChange={handleChange}
+                  rows="3"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#101828] focus:border-transparent transition"
+                  required
+                />
+              </div>
+
+              {/* Dirección */}
+              <div className="space-y-2">
+                <label htmlFor="direccion" className="block text-sm font-medium text-gray-700">
+                  Dirección *
+                </label>
+                <input
+                  type="text"
+                  id="direccion"
+                  name="direccion"
+                  placeholder="Calle y número"
+                  value={formData.direccion}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#101828] focus:border-transparent transition"
+                  required
+                />
+              </div>
+
+              {/* Colonia */}
+              <div className="space-y-2">
+                <label htmlFor="colonia" className="block text-sm font-medium text-gray-700">
+                  Colonia *
+                </label>
+                <input
+                  type="text"
+                  id="colonia"
+                  name="colonia"
+                  placeholder="Nombre de la colonia"
+                  value={formData.colonia}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#101828] focus:border-transparent transition"
+                  required
+                />
+              </div>
+
+              {/* Ciudad */}
+              <div className="space-y-2">
+                <label htmlFor="ciudad" className="block text-sm font-medium text-gray-700">
+                  Ciudad *
+                </label>
+                <input
+                  type="text"
+                  id="ciudad"
+                  name="ciudad"
+                  placeholder="Nombre de la ciudad"
+                  value={formData.ciudad}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#101828] focus:border-transparent transition"
+                  required
+                />
+              </div>
+
+              {/* Estado */}
+              <div className="space-y-2">
+                <label htmlFor="estado" className="block text-sm font-medium text-gray-700">
+                  Estado *
+                </label>
+                <input
+                  type="text"
+                  id="estado"
+                  name="estado"
+                  placeholder="Nombre del estado"
+                  value={formData.estado}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#101828] focus:border-transparent transition"
+                  required
+                />
+              </div>
+
+              {/* Código Postal */}
+              <div className="space-y-2">
+                <label htmlFor="codigoPostal" className="block text-sm font-medium text-gray-700">
+                  Código Postal *
+                </label>
+                <input
+                  type="text"
+                  id="codigoPostal"
+                  name="codigoPostal"
+                  placeholder="5 dígitos"
+                  value={formData.codigoPostal}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#101828] focus:border-transparent transition"
+                  required
+                />
+              </div>
+
+              {/* Fecha de Registro */}
+              <div className="space-y-2">
+                <label htmlFor="fechaRegistro" className="block text-sm font-medium text-gray-700">
+                  Fecha de Registro
+                </label>
+                <input
+                  type="date"
+                  id="fechaRegistro"
+                  name="fechaRegistro"
+                  value={formData.fechaRegistro}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#101828] focus:border-transparent transition"
+                />
+              </div>
             </div>
           </div>
 
-          {/* Coordenadas y Precios */}
-          <div>
-            <h3 className="text-2xl font-semibold mb-6 text-[#182230]">
+          {/* UBICACIÓN Y PRECIOS */}
+          <div className="space-y-6">
+            <h3 className="text-2xl font-semibold text-[#182230] pb-3">
               Ubicación y Precios
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <input
-                type="text"
-                name="latitud"
-                placeholder="Latitud"
-                value={formData.latitud}
-                onChange={handleChange}
-                className="input-style"
-              />
-              <input
-                type="text"
-                name="longitud"
-                placeholder="Longitud"
-                value={formData.longitud}
-                onChange={handleChange}
-                className="input-style"
-              />
-              <input
-                type="text"
-                name="tipoPropiedad"
-                placeholder="Tipo de Propiedad"
-                value={formData.tipoPropiedad}
-                onChange={handleChange}
-                className="input-style"
-              />
-              <input
-                type="text"
-                name="estatus"
-                placeholder="Estatus"
-                value={formData.estatus}
-                onChange={handleChange}
-                className="input-style"
-              />
-              <input
-                type="number"
-                name="precioVenta"
-                placeholder="Precio de Venta"
-                value={formData.precioVenta}
-                onChange={handleChange}
-                className="input-style"
-              />
-              <input
-                type="number"
-                name="precioRenta"
-                placeholder="Precio de Renta"
-                value={formData.precioRenta}
-                onChange={handleChange}
-                className="input-style"
-              />
+              {/* Latitud */}
+              <div className="space-y-2">
+                <label htmlFor="latitud" className="block text-sm font-medium text-gray-700">
+                  Latitud
+                </label>
+                <input
+                  type="text"
+                  id="latitud"
+                  name="latitud"
+                  placeholder="Ej. 19.432608"
+                  value={formData.latitud}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#101828] focus:border-transparent transition"
+                />
+              </div>
+
+              {/* Longitud */}
+              <div className="space-y-2">
+                <label htmlFor="longitud" className="block text-sm font-medium text-gray-700">
+                  Longitud
+                </label>
+                <input
+                  type="text"
+                  id="longitud"
+                  name="longitud"
+                  placeholder="Ej. -99.133209"
+                  value={formData.longitud}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#101828] focus:border-transparent transition"
+                />
+              </div>
+
+              {/* Tipo de Propiedad */}
+              <div className="space-y-2">
+                <label htmlFor="tipoPropiedad" className="block text-sm font-medium text-gray-700">
+                  Tipo de Propiedad *
+                </label>
+                <select
+                  id="tipoPropiedad"
+                  name="tipoPropiedad"
+                  value={formData.tipoPropiedad}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#101828] focus:border-transparent transition"
+                >
+                  {tipoPropiedadOptions.map(option => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Estatus */}
+              <div className="space-y-2">
+                <label htmlFor="estatus" className="block text-sm font-medium text-gray-700">
+                  Estatus *
+                </label>
+                <select
+                  id="estatus"
+                  name="estatus"
+                  value={formData.estatus}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#101828] focus:border-transparent transition"
+                >
+                  {estatusOptions.map(option => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Precio de Venta */}
+              <div className="space-y-2">
+                <label htmlFor="precioVenta" className="block text-sm font-medium text-gray-700">
+                  Precio de Venta (MXN)
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3 top-3 text-gray-500">$</span>
+                  <input
+                    type="text"
+                    id="precioVenta"
+                    name="precioVenta"
+                    placeholder="0.00"
+                    value={formData.precioVenta}
+                    onChange={handleChange}
+                    className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#101828] focus:border-transparent transition"
+                  />
+                </div>
+              </div>
+
+              {/* Precio de Renta */}
+              <div className="space-y-2">
+                <label htmlFor="precioRenta" className="block text-sm font-medium text-gray-700">
+                  Precio de Renta Mensual (MXN)
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3 top-3 text-gray-500">$</span>
+                  <input
+                    type="text"
+                    id="precioRenta"
+                    name="precioRenta"
+                    placeholder="0.00"
+                    value={formData.precioRenta}
+                    onChange={handleChange}
+                    className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#101828] focus:border-transparent transition"
+                  />
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Características */}
-          <div>
-            <h3 className="text-2xl font-semibold mb-6 text-[#182230]">
-              Características
+          {/* CARACTERÍSTICAS */}
+          <div className="space-y-6">
+            <h3 className="text-2xl font-semibold text-[#182230] pb-3">
+              Características de la Propiedad
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <input
-                type="number"
-                name="numHabitaciones"
-                placeholder="Habitaciones"
-                value={formData.numHabitaciones}
-                onChange={handleChange}
-                className="input-style"
-              />
-              <input
-                type="number"
-                name="numBanios"
-                placeholder="Baños"
-                value={formData.numBanios}
-                onChange={handleChange}
-                className="input-style"
-              />
-              <input
-                type="number"
-                name="metrosCuadrados"
-                placeholder="Metros Cuadrados"
-                value={formData.metrosCuadrados}
-                onChange={handleChange}
-                className="input-style"
-              />
-              <input
-                type="number"
-                name="numEstacionamiento"
-                placeholder="Estacionamientos"
-                value={formData.numEstacionamiento}
-                onChange={handleChange}
-                className="input-style"
-              />
-              <input
-                type="number"
-                name="plantas"
-                placeholder="Plantas"
-                value={formData.plantas}
-                onChange={handleChange}
-                className="input-style"
-              />
+              {/* Número de Habitaciones */}
+              <div className="space-y-2">
+                <label htmlFor="numHabitaciones" className="block text-sm font-medium text-gray-700">
+                  Número de Habitaciones
+                </label>
+                <input
+                  type="number"
+                  id="numHabitaciones"
+                  name="numHabitaciones"
+                  placeholder="0"
+                  value={formData.numHabitaciones}
+                  onChange={handleChange}
+                  min="0"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#101828] focus:border-transparent transition"
+                />
+              </div>
+
+              {/* Número de Baños */}
+              <div className="space-y-2">
+                <label htmlFor="numBanios" className="block text-sm font-medium text-gray-700">
+                  Número de Baños
+                </label>
+                <input
+                  type="number"
+                  id="numBanios"
+                  name="numBanios"
+                  placeholder="0"
+                  value={formData.numBanios}
+                  onChange={handleChange}
+                  min="0"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#101828] focus:border-transparent transition"
+                />
+              </div>
+
+              {/* Metros Cuadrados */}
+              <div className="space-y-2">
+                <label htmlFor="metrosCuadrados" className="block text-sm font-medium text-gray-700">
+                  Metros Cuadrados (m²)
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    id="metrosCuadrados"
+                    name="metrosCuadrados"
+                    placeholder="0.00"
+                    value={formData.metrosCuadrados}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#101828] focus:border-transparent transition"
+                  />
+                  <span className="absolute right-3 top-3 text-gray-500">m²</span>
+                </div>
+              </div>
+
+              {/* Número de Estacionamientos */}
+              <div className="space-y-2">
+                <label htmlFor="numEstacionamiento" className="block text-sm font-medium text-gray-700">
+                  Estacionamientos
+                </label>
+                <input
+                  type="number"
+                  id="numEstacionamiento"
+                  name="numEstacionamiento"
+                  placeholder="0"
+                  value={formData.numEstacionamiento}
+                  onChange={handleChange}
+                  min="0"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#101828] focus:border-transparent transition"
+                />
+              </div>
+
+              {/* Plantas */}
+              <div className="space-y-2">
+                <label htmlFor="plantas" className="block text-sm font-medium text-gray-700">
+                  Número de Plantas
+                </label>
+                <input
+                  type="number"
+                  id="plantas"
+                  name="plantas"
+                  placeholder="0"
+                  value={formData.plantas}
+                  onChange={handleChange}
+                  min="0"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#101828] focus:border-transparent transition"
+                />
+              </div>
             </div>
           </div>
 
-          {/* Amenidades */}
-          <div>
-            <h3 className="text-2xl font-semibold mb-6 text-[#182230]">
-              Amenidades
+          {/* AMENIDADES */}
+          <div className="space-y-6">
+            <h3 className="text-2xl font-semibold text-[#182230] pb-3">
+              Amenidades y Servicios
             </h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-[#475467]">
-              {[
-                "residencial",
-                "jardin",
-                "alberca",
-                "sotano",
-                "terraza",
-                "cuartoServicio",
-                "muebles",
-                "credito",
-                "publicadoEcommerce",
-              ].map((amenidad) => (
-                <label
-                  key={amenidad}
-                  className="flex items-center gap-2 bg-[#F8F9FA] p-3 rounded-lg hover:bg-[#E4E7EC]/40 cursor-pointer transition-all duration-300"
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {amenidades.map((amenidad) => (
+                <div
+                  key={amenidad.name}
+                  className={`flex items-center gap-3 p-4 rounded-xl border transition-all duration-300 cursor-pointer ${formData[amenidad.name]
+                    ? "bg-[#101828] text-white border-[#101828]"
+                    : "bg-[#F8F9FA] border-gray-200 hover:bg-gray-50"
+                    }`}
+                  onClick={() => setFormData({
+                    ...formData,
+                    [amenidad.name]: !formData[amenidad.name]
+                  })}
                 >
-                  <input
-                    type="checkbox"
-                    name={amenidad}
-                    checked={formData[amenidad]}
-                    onChange={handleChange}
-                    className="accent-[#101828] w-5 h-5"
-                  />
-                  <span className="capitalize">{amenidad}</span>
-                </label>
+                  <div className={`w-6 h-6 flex items-center justify-center rounded border ${formData[amenidad.name]
+                    ? "bg-white border-white"
+                    : "bg-white border-gray-300"
+                    }`}>
+                    {formData[amenidad.name] && (
+                      <svg className="w-4 h-4 text-[#101828]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                  </div>
+                  <span className="font-medium text-sm">{amenidad.label}</span>
+                </div>
               ))}
             </div>
           </div>
-          {/* Sección de Imágenes */}
-          <div>
-            <h3 className="text-2xl font-semibold mb-6 text-[#182230]">
+
+          {/* IMÁGENES */}
+          <div className="space-y-6">
+            <h3 className="text-2xl font-semibold text-[#182230] pb-3">
               Imágenes de la Propiedad
             </h3>
             <div className="space-y-4">
-              <input
-                type="file"
-                name="imagenes"
-                multiple
-                accept="image/*"
-                onChange={handleImagenChange}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#101828] focus:border-transparent"
-              />
-              <p className="text-sm text-gray-600">
-                Puedes seleccionar múltiples imágenes (máximo 10)
-              </p>
-
-              {/* Vista previa de imágenes */}
-              {imagenes.length > 0 && (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
-                  {Array.from(imagenes).map((imagen, index) => (
-                    <div key={index} className="relative">
-                      <img
-                        src={URL.createObjectURL(imagen)}
-                        alt={`Vista previa ${index + 1}`}
-                        className="w-full h-24 object-cover rounded-lg"
-                      />
-                      <span className="absolute top-1 right-1 bg-black bg-opacity-50 text-white text-xs px-1 rounded">
-                        {index + 1}
-                      </span>
+              <div className="space-y-2">
+                <label htmlFor="imagenes" className="block text-sm font-medium text-gray-700">
+                  Seleccionar Imágenes
+                </label>
+                <div className="flex items-center justify-center w-full">
+                  <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition">
+                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                      <svg className="w-8 h-8 mb-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                      </svg>
+                      <p className="mb-1 text-sm text-gray-500">
+                        <span className="font-semibold">Haz clic para subir</span> o arrastra y suelta
+                      </p>
+                      <p className="text-xs text-gray-500">PNG, JPG, GIF (MAX. 10MB por imagen)</p>
                     </div>
-                  ))}
+                    <input
+                      id="imagenes"
+                      name="imagenes"
+                      type="file"
+                      multiple
+                      accept="image/*"
+                      onChange={handleImagenChange}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+              </div>
+
+              {/* Vista previa */}
+              {imagenes.length > 0 && (
+                <div className="space-y-3">
+                  <p className="text-sm font-medium text-gray-700">
+                    Vista previa ({imagenes.length} imagen{imagenes.length !== 1 ? 'es' : ''})
+                  </p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                    {Array.from(imagenes).map((imagen, index) => (
+                      <div key={index} className="relative group">
+                        <img
+                          src={URL.createObjectURL(imagen)}
+                          alt={`Vista previa ${index + 1}`}
+                          className="w-full h-32 object-cover rounded-lg shadow"
+                        />
+                        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition rounded-lg flex items-center justify-center">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const nuevasImagenes = [...imagenes];
+                              nuevasImagenes.splice(index, 1);
+                              setImagenes(nuevasImagenes);
+                            }}
+                            className="opacity-0 group-hover:opacity-100 bg-red-500 text-white p-1 rounded-full transition"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        </div>
+                        <div className="absolute top-2 right-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+                          {index + 1}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Botón de Envío */}
+          {/* BOTÓN DE ENVÍO */}
           <div className="text-center pt-8">
             <button
               type="submit"
-              className="px-10 py-4 bg-gradient-to-r from-[#101828] to-[#182230] text-white font-semibold rounded-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
+              disabled={loading}
+              className={`px-12 py-4 bg-gradient-to-r from-[#101828] to-[#182230] text-white font-semibold rounded-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 active:scale-95 ${loading ? 'opacity-70 cursor-not-allowed' : ''
+                }`}
             >
-              Guardar Propiedad
+              {loading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Procesando...
+                </span>
+              ) : (
+                isEditing ? 'Actualizar Propiedad' : 'Guardar Propiedad'
+              )}
             </button>
           </div>
         </form>
       </div>
+
+      {/* Estilos para animaciones */}
+      <style jsx>{`
+        @keyframes fade-in {
+          from { opacity: 0; transform: translateY(-10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+          animation: fade-in 0.3s ease-out;
+        }
+      `}</style>
     </section>
-    /** 
-    </div>
-    */
   );
 };
 
-export default FormProp
+export default FormProp;
