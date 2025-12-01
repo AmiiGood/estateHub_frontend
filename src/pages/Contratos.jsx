@@ -66,9 +66,6 @@ const Contratos = () => {
                       <span className="text-xl font-extrabold text-white drop-shadow-sm">
                         ${prop.precioVenta || prop.precioRenta || "0.00"}
                       </span>
-                      <span className="text-xs text-gray-400">
-                        ID: {prop.idPropiedad}
-                      </span>
                     </div>
 
                     {/* Información de contratos */}

@@ -37,20 +37,6 @@ const Contrato = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <div className="space-y-4">
               <div>
-                <p className="text-gray-400 text-sm mb-1">ID de Propiedad</p>
-                <p className="text-white font-semibold text-lg">
-                  {contrato.idPropiedad}
-                </p>
-              </div>
-
-              <div>
-                <p className="text-gray-400 text-sm mb-1">ID de Usuario</p>
-                <p className="text-white font-semibold text-lg">
-                  {contrato.idUsuario}
-                </p>
-              </div>
-
-              <div>
                 <p className="text-gray-400 text-sm mb-1">Monto Mensual</p>
                 <p className="text-white font-bold text-2xl">
                   ${contrato.montoMensual.toFixed(2)}
@@ -61,6 +47,21 @@ const Contrato = () => {
                 <p className="text-gray-400 text-sm mb-1">Depósito</p>
                 <p className="text-white font-semibold text-lg">
                   ${contrato.deposito.toFixed(2)}
+                </p>
+              </div>
+              <div>
+                <p className="text-gray-400 text-sm mb-1">Fecha de Creación</p>
+                <p className="text-white font-semibold text-lg">
+                  {contrato.fechaCreacion
+                    ? new Date(contrato.fechaCreacion).toLocaleDateString(
+                        "es-MX",
+                        {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        }
+                      )
+                    : "No disponible"}
                 </p>
               </div>
             </div>
@@ -97,22 +98,6 @@ const Contrato = () => {
                       (1000 * 60 * 60 * 24 * 30)
                   )}{" "}
                   meses
-                </p>
-              </div>
-
-              <div>
-                <p className="text-gray-400 text-sm mb-1">Fecha de Creación</p>
-                <p className="text-white font-semibold text-lg">
-                  {contrato.fechaCreacion
-                    ? new Date(contrato.fechaCreacion).toLocaleDateString(
-                        "es-MX",
-                        {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        }
-                      )
-                    : "No disponible"}
                 </p>
               </div>
             </div>

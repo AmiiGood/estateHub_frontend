@@ -13,6 +13,8 @@ import Usuarios, { loaderUsuario } from "./Usuarios";
 import Contratos, { loaderContratos } from "./Contratos";
 import Contrato, { loaderContrato } from "./Contrato";
 import FormCont from "../components/FormCont";
+import Pagos, { loaderPagos } from "./Pagos";
+import FormPag from "../components/FormPag";
 
 //Creamos el router y su configuración básica
 export const router = createBrowserRouter([
@@ -78,6 +80,19 @@ export const router = createBrowserRouter([
       {
         path: "/editarContrato/:id",
         element: <FormCont />,
+      },
+      {
+        path: "/pagos",
+        element: <Pagos />,
+        loader: loaderPagos,
+      },
+      {
+        path: "/agregarPago/:idContrato",
+        element: <FormPag />,
+      },
+      {
+        path: "/editarPago/:idPago",
+        element: <FormPag />,
       },
     ],
   },

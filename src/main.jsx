@@ -9,17 +9,20 @@ import PropState from "./contexts/Propiedad/PropState";
 import UsuarioState from "./contexts/Usuario/UsuarioState";
 import PerState from "./contexts/Perfil/PerState";
 import ContState from "./contexts/Contrato/ContState";
+import PagState from "./contexts/Pago/PagState";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <AuthProvider>
       <PropState>
         <ContState>
-          <PerState>
-            <UsuarioState>
-              <RouterProvider router={router} />
-            </UsuarioState>
-          </PerState>
+          <PagState>
+            <PerState>
+              <UsuarioState>
+                <RouterProvider router={router} />
+              </UsuarioState>
+            </PerState>
+          </PagState>
         </ContState>
       </PropState>
     </AuthProvider>

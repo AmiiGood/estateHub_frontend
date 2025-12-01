@@ -121,9 +121,6 @@ const Perfil = () => {
             <FormPer usuarioActual={usuarioData} onClose={handleCloseForm} />
           )}
         </div>
-
-        {/* Sección de Estadísticas */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
       </div>
     </div>
   );
