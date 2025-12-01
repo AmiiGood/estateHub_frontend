@@ -1,17 +1,33 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import estateHubLogo from "../assets/estateHubLogoOscuro.png";
+import estateHubLogo from "../assets/estateHubLogoFullWhite.png";
+import Particles, { initParticlesEngine } from "@tsparticles/react";
+import { loadSlim } from "@tsparticles/slim";
+import { Eye, EyeClosed } from "lucide-react";
+
 
 const Register = ({ onToggleView }) => {
   const { register, loading } = useAuth();
   const [formData, setFormData] = useState({
     name: "",
+    aPaterno: "",
+    aMaterno: "",
     email: "",
     password: "",
     confirmPassword: "",
+    telefono: "",
+
   });
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [engineReady, setEngineReady] = useState(false);
+
+  useEffect(() => {
+    initParticlesEngine(async (engine) => {
+      await loadSlim(engine);
+    }).then(() => setEngineReady(true));
+  }, []);
+
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -19,60 +35,87 @@ const Register = ({ onToggleView }) => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    const { name, email, password, confirmPassword } = formData;
+  e.preventDefault();
+  const { name,aPaterno,aMaterno, email, password, confirmPassword, telefono } = formData;
 
-    if (!name || !email || !password || !confirmPassword) {
-      setError("Por favor completa todos los campos");
-      return;
-    }
+  if (!name || !email || !password || !confirmPassword || !telefono || !aPaterno || !aMaterno) {
+    setError("Por favor completa todos los campos");
+    return;
+  }
 
-    if (password !== confirmPassword) {
-      setError("Las contraseñas no coinciden");
-      return;
-    }
+  if (password !== confirmPassword) {
+    setError("Las contraseñas no coinciden");
+    return;
+  }
 
-    const result = await register(name, email, password);
-    if (!result.success) setError(result.error || "Error al crear la cuenta");
-  };
+  const result = await register({
+  nombre: formData.name,
+  apellidoPaterno: formData.aPaterno,
+  apellidoMaterno: formData.aMaterno,
+  email: formData.email,
+  password: formData.password,
+  telefono: formData.telefono,
+});
+
+
+  if (!result.success) setError(result.error || "Error al crear la cuenta");
+};
+
 
   return (
     <div className="min-h-screen flex">
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
-        <div className="absolute inset-0 overflow-hidden opacity-20">
-          {[...Array(20)].map((_, i) => (
-            <div
-              key={i}
-              className="absolute text-white text-opacity-60 animate-float"
-              style={{
-                top: `${Math.random() * 100}%`,
-                left: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 8}s`,
-                animationDuration: `${10 + Math.random() * 10}s`,
-                transform: `scale(${0.6 + Math.random() * 0.8})`,
-              }}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path d="M13 11h8v2h-8v8h-2v-8H3v-2h8V3h2v8z" />
-              </svg>
-            </div>
-          ))}
-        </div>
-
-        <div className="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden min-h-screen bg-[#0e1036]">
+        {engineReady && (
+          <Particles
+            id="tsparticles"
+            className="absolute inset-0"
+            options={{
+              background: {
+                color: { value: "#0e1036" },
+              },
+              fullScreen: { enable: false },
+              fpsLimit: 60,
+              particles: {
+                number: {
+                  value: 70,
+                  density: { enable: true, area: 800 },
+                },
+                color: { value: ["#ffffff", "#60a5fa", "#93c5fd"] },
+                opacity: { value: 0.7 },
+                size: { value: { min: 1, max: 3 } },
+                move: {
+                  enable: true,
+                  speed: 0.6,
+                  direction: "none",
+                  random: true,
+                  straight: false,
+                  outModes: "out",
+                },
+                links: {
+                  enable: true,
+                },
+                shape: { type: "circle" },
+              },
+              interactivity: {
+                events: {
+                  onHover: { enable: true, mode: "repulse" },
+                  resize: true,
+                },
+                modes: {
+                  repulse: { distance: 100, duration: 0.3 },
+                },
+              },
+              detectRetina: true,
+            }}
+          />
+        )}
 
         <div className="relative z-10 flex flex-col justify-between p-12 text-white w-full">
           <div className="flex items-center mb-10">
             <img
               src={estateHubLogo}
               alt="EstateHubLogo"
-              className="w-48 drop-shadow-lg animate-fadeIn"
+              className="w-60 drop-shadow-lg animate-fadeIn"
             />
           </div>
 
@@ -106,13 +149,13 @@ const Register = ({ onToggleView }) => {
                       />
                     </svg>
                   </div>
-                  <span className="text-gray-200">{text}</span>
+                  <span className="text-gray-300">{text}</span>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="text-sm text-gray-400 mt-12">
+          <div className="text-sm text-gray-500 mt-12">
             © 2025 EstateHub. Todos los derechos reservados.
           </div>
         </div>
@@ -151,110 +194,146 @@ const Register = ({ onToggleView }) => {
           </div>
 
           <form className="space-y-6" onSubmit={handleSubmit}>
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm flex items-start">
-                {error}
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm flex items-start">
+                  {error}
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-900 mb-2">
+                    Nombre
+                  </label>
+                  <input
+                    type="text"
+                    name="name"
+                    required
+                    placeholder="Tu nombre"
+                    value={formData.name}
+                    onChange={handleChange}
+                    className="input-field"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-900 mb-2">
+                    Apellido Paterno
+                  </label>
+                  <input
+                    type="text"
+                    name="aPaterno"
+                    required
+                    placeholder="Tu apellido paterno"
+                    value={formData.aPaterno}
+                    onChange={handleChange}
+                    className="input-field"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-900 mb-2">
+                    Apellido Materno
+                  </label>
+                  <input
+                    type="text"
+                    name="aMaterno"
+                    required
+                    placeholder="Tu apellido materno"
+                    value={formData.aMaterno}
+                    onChange={handleChange}
+                    className="input-field"
+                  />
+                </div>
               </div>
-            )}
 
-            <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">
-                Nombre completo
-              </label>
-              <input
-                type="text"
-                name="name"
-                required
-                placeholder="Tu nombre"
-                value={formData.name}
-                onChange={handleChange}
-                className="input-field"
-              />
-            </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-900 mb-2">
+                    Correo electrónico
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    required
+                    placeholder="tu@email.com"
+                    value={formData.email}
+                    onChange={handleChange}
+                    className="input-field"
+                  />
+                </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">
-                Correo electrónico
-              </label>
-              <input
-                type="email"
-                name="email"
-                required
-                placeholder="tu@email.com"
-                value={formData.email}
-                onChange={handleChange}
-                className="input-field"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">
-                Contraseña
-              </label>
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  name="password"
-                  required
-                  placeholder="Crea una contraseña"
-                  value={formData.password}
-                  onChange={handleChange}
-                  className="input-field pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                >
-                  <svg
-                    className="h-5 w-5 text-gray-400 hover:text-gray-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    {showPassword ? (
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M13.875 18.825A10.05 10.05 0 0112 19"
-                      />
-                    ) : (
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M15 12a3 3 0 11-6 0"
-                      />
-                    )}
-                  </svg>
-                </button>
+                <div>
+                  <label className="block text-sm font-medium text-gray-900 mb-2">
+                    Teléfono
+                  </label>
+                  <input
+                    type="text"
+                    name="telefono"
+                    required
+                    placeholder="Tu número de teléfono"
+                    value={formData.telefono}
+                    onChange={handleChange}
+                    className="input-field"
+                  />
+                </div>
               </div>
-            </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">
-                Confirmar contraseña
-              </label>
-              <input
-                type={showPassword ? "text" : "password"}
-                name="confirmPassword"
-                required
-                placeholder="Repite tu contraseña"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                className="input-field"
-              />
-            </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn-primary flex items-center justify-center group"
-            >
-              {loading ? "Creando cuenta..." : "Registrarse"}
-            </button>
-          </form>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-900 mb-2">
+                    Contraseña
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      name="password"
+                      required
+                      placeholder="Crea una contraseña"
+                      value={formData.password}
+                      onChange={handleChange}
+                      className="input-field pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                    >
+                      {showPassword ? (
+                        <EyeClosed className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                      ) : (
+                        <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-900 mb-2">
+                    Confirmar contraseña
+                  </label>
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    name="confirmPassword"
+                    required
+                    placeholder="Repite tu contraseña"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    className="input-field"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="btn-primary flex items-center justify-center group"
+              >
+                {loading ? "Creando cuenta..." : "Registrarse"}
+              </button>
+            </form>
+
         </div>
       </div>
 

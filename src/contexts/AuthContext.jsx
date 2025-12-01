@@ -1,30 +1,47 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const SUPER_ADMIN_EMAIL = "alexis@gmail.com";
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (error) {
+        console.error("Error parsing stored user:", error);
+        localStorage.removeItem('user');
+      }
+    }
+    setLoading(false);
+  }, []);
 
   const login = async (email, password) => {
     setLoading(true);
     try {
-      // Aquí va la llamada a la API
-      // const response = await fetch('API_URL/login', { ... });
-      
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const mockUser = {
-        id: 1,
-        email: email,
-        name: 'Usuario Demo',
-        role: 'Propietario'
-      };
-      
-      setUser(mockUser);
-      localStorage.setItem('user', JSON.stringify(mockUser));
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/login/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Error en el inicio de sesión');
+      }
+
+      const userData = await response.json();
+      console.log("Datos del usuario recibidos en login:", userData);
+
+      setUser(userData);
+      localStorage.setItem('user', JSON.stringify(userData));
       return { success: true };
     } catch (error) {
+      console.error("Error en login:", error);
       return { success: false, error: error.message };
     } finally {
       setLoading(false);
@@ -34,22 +51,24 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     setLoading(true);
     try {
-      // Aquí va la llamada a la API
-      // const response = await fetch('API_URL/register', { ... });
-      
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const newUser = {
-        id: Date.now(),
-        email: userData.email,
-        name: userData.name,
-        role: 'Propietario'
-      };
-      
-      setUser(newUser);
-      localStorage.setItem('user', JSON.stringify(newUser));
-      return { success: true };
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/usuarios/postUsuario`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ usuario: userData }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Error al registrarse');
+      }
+
+      const result = await response.json();
+      console.log("Respuesta del registro:", result);
+
+      // Después del registro, redirigir al login
+      return { success: true, message: result.message };
     } catch (error) {
+      console.error("Error en registro:", error);
       return { success: false, error: error.message };
     } finally {
       setLoading(false);
@@ -61,8 +80,25 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('user');
   };
 
+  const isAuthenticated = () => {
+    return localStorage.getItem('user') !== null;
+  }
+
+
+  const getIdUsuario = () => {
+    return user?.usuario?.idUsuario;
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, loading }}>
+    <AuthContext.Provider value={{
+      user,
+      login,
+      register,
+      logout,
+      isAuthenticated,
+      loading,
+      getIdUsuario
+    }}>
       {children}
     </AuthContext.Provider>
   );
