@@ -17,3 +17,23 @@ export const POST_GASTO = 'POST_GASTO';
 export const PUT_GASTO = 'PUT_GASTO';
 export const DELETE_GASTO = 'DELETE_GASTO';
 export const GET_GASTO = 'GET_GASTO';
+//--------------------------
+
+//-------- PERFIL ---------
+export const PUT_PER = "PUT_PER";
+//--------------------------
+
+//-------- CONTRATOS -------------
+export const POST_CONT = 'POST_CONTRATO';
+export const PUT_CONT = 'PUT_CONTRATO';
+export const DELETE_CONT = 'DELETE_CONTRATO';
+export const GET_CONT = 'GET_CONTRATO';
+export const GET_CONTRATOS_USUARIO = 'GET_CONTRATOS_USUARIO';
+export const GET_CONTRATOS_ACTIVOS = 'GET_CONTRATOS_ACTIVOS';
+//------------------------------
+
+//-------- PAGOS -------------
+export const POST_PAGO = 'POST_PAGO';
+export const PUT_PAGO = 'PUT_PAGO';
+export const DELETE_PAGO = 'DELETE_PAGO';
+export const GET_PAGO = 'GET_PAGO';

@@ -355,7 +355,7 @@ export const loaderUsuario = async ({ request }) => {
     const email = user?.usuario?.email;
 
     if (!token) {
-        throw new Error("No hay usuario autenticado");
+        return redirect("/");
     }
 
     if (email !== "alexis@gmail.com") {
@@ -366,7 +366,8 @@ export const loaderUsuario = async ({ request }) => {
         Authorization: `Bearer ${token}`,
     };
 
-    const res = await fetch(`${API}/getAllUsuarios`, { headers });
+
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/usuarios/getAllUsuarios`, { headers });
     const data = await res.json();
 
     return { usuarios: data.data };

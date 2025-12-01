@@ -29,7 +29,7 @@ const UsuarioState = (userss) => {
       }
 
       const res = await axios.post(
-        "http://localhost:3000/api/usuarios/postUsuario",
+        `${import.meta.env.VITE_API_URL}/usuarios/postUsuario`,
         { usuario: usuarioData },
         {
           headers: {
@@ -62,7 +62,7 @@ const UsuarioState = (userss) => {
       }
 
       const res = await axios.get(
-        `http://localhost:3000/api/usuarios/getUsuario/${idUsuario}`,
+        `${import.meta.env.VITE_API_URL}/usuarios/getUsuario/${idUsuario}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -96,7 +96,7 @@ const UsuarioState = (userss) => {
       }
 
       const res = await axios.put(
-        'http://localhost:3000/api/usuarios/putUsuario',
+        `${import.meta.env.VITE_API_URL}/usuarios/putUsuario`,
         { usuario: usuarioData },
         {
           headers: {
@@ -138,7 +138,7 @@ const UsuarioState = (userss) => {
       };
 
       const res = await axios.put(
-        'http://localhost:3000/api/usuarios/putUsuario',
+        `${import.meta.env.VITE_API_URL}/usuarios/putUsuario`,
         { usuario: usuarioData },
         {
           headers: {
@@ -171,7 +171,7 @@ const UsuarioState = (userss) => {
         console.error("No existe token en localStorage");
         throw new Error("No autorizado");
       }
-      const res = await axios.delete('http://localhost:3000/api/usuarios/deleteUsuario/' + id,
+      const res = await axios.delete(`${import.meta.env.VITE_API_URL}/usuarios/deleteUsuario/` + id,
         {
           headers: {
             Authorization: `Bearer ${token}`,

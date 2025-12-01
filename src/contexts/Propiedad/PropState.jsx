@@ -34,7 +34,7 @@ const PropState = (propss) => {
       }
 
       const res = await axios.post(
-        "http://localhost:3000/api/propiedades/postPropiedad",
+        `${import.meta.env.VITE_API_URL}/propiedades/postPropiedad`,
         { propiedad: propiedadData },
         {
           headers: {
@@ -69,7 +69,7 @@ const PropState = (propss) => {
       }
 
       const res = await axios.get(
-        `http://localhost:3000/api/propiedades/getPropiedad/${idPropiedad}`,
+        `${import.meta.env.VITE_API_URL}/propiedades/getPropiedad/${idPropiedad}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -104,7 +104,7 @@ const PropState = (propss) => {
       }
 
       const res = await axios.put(
-        'http://localhost:3000/api/propiedades/putPropiedad',
+        `${import.meta.env.VITE_API_URL}/propiedades/putPropiedad`,
         { propiedad: propiedadData },
         {
           headers: {
@@ -137,7 +137,7 @@ const PropState = (propss) => {
         console.error("No existe token en localStorage");
         throw new Error("No autorizado");
       }
-      const res = await axios.delete('http://localhost:3000/api/propiedades/deletePropiedad/' + id,
+      const res = await axios.delete(`${import.meta.env.VITE_API_URL}/propiedades/deletePropiedad/` + id,
         {
           headers: {
             Authorization: `Bearer ${token}`,

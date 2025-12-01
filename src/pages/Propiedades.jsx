@@ -1,5 +1,5 @@
 import React, { useContext, useState } from "react";
-import { Link, useLoaderData } from "react-router-dom";
+import { Link, redirect, useLoaderData } from "react-router-dom";
 import FormProp from "../components/FormProp";
 import {
   Collapse,
@@ -134,8 +134,6 @@ const Propiedades = () => {
 
 
       <div className="max-w-7xl mx-auto px-6 py-12">
-
-
         {/* Encabezado */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-14">
           <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-white drop-shadow-lg">
@@ -150,18 +148,18 @@ const Propiedades = () => {
             href="#collapseExample"
             role="button"
             aria-expanded="false"
-            aria-controls="collapseExample">
+            aria-controls="collapseExample"
+          >
             Agregar propiedad
           </a>
-
         </div>
         <div
           class="!visible hidden text-center"
           id="collapseExample"
-          data-twe-collapse-item>
+          data-twe-collapse-item
+        >
           <FormProp />
         </div>
-
 
         {/* Grid de propiedades */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
@@ -170,7 +168,6 @@ const Propiedades = () => {
               const imagenPrincipal =
                 prop.imagenes?.[0]?.urlImagen ||
                 "";
-
 
               return (
                 <div
@@ -185,7 +182,6 @@ const Propiedades = () => {
                     />
                   </div>
 
-
                   <div className="p-6 text-gray-100">
                     <h3 className="text-2xl font-bold mb-1 truncate drop-shadow-sm">
                       {prop.titulo}
@@ -196,36 +192,38 @@ const Propiedades = () => {
                     <p className="text-sm text-gray-400 mb-4 line-clamp-2">
                       {prop.descripcion || "Sin descripción."}
                     </p>
-                    <span className="text-xl font-extrabold text-white drop-shadow-sm">
-                      ${prop.precioVenta || prop.precioRenta || "0.00"}
-                    </span>
+
 
                     <div className="flex justify-between items-center mt-3">
-
-
-
-                      <div className="flex gap-3">
-                        <Link
-                          to={`/propiedad/${prop.idPropiedad}`}
-                          className="px-4 py-2 rounded-lg bg-[#1F2A37] hover:bg-[#273445] text-white text-sm shadow-md transition"
-                        >
-                          Ver más
-                        </Link>
-                        <Link
-                          to={`/editarProp/${prop.idPropiedad}`}
-                          className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm shadow-md transition"
-                        >
-                          Editar
-                        </Link>
-                        <button
-                          className="px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white text-sm shadow-md transition"
-                          onClick={() => askDelete(prop.idPropiedad)}
-                        >
-                          Eliminar
-                        </button>
-
-                      </div>
+                      <span className="text-xl font-extrabold text-white drop-shadow-sm">
+                        ${prop.precioVenta || prop.precioRenta || "0.00"}
+                      </span>
                     </div>
+                    <br />
+
+
+
+                    <div className="flex flex-col sm:flex-row gap-3 mt-3">
+                      <Link
+                        to={`/propiedad/${prop.idPropiedad}`}
+                        className="flex-1 text-center px-4 py-2 rounded-lg bg-[#1F2A37] hover:bg-[#273445] text-white text-sm shadow-md transition"
+                      >
+                        Ver más
+                      </Link>
+                      <Link
+                        to={`/editarProp/${prop.idPropiedad}`}
+                        className="flex-1 text-center px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm shadow-md transition"
+                      >
+                        Editar
+                      </Link>
+                      <button
+                        className="flex-1 text-center px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white text-sm shadow-md transition"
+                        onClick={() => askDelete(prop.idPropiedad)}
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+
                   </div>
                 </div>
               );
@@ -243,7 +241,6 @@ const Propiedades = () => {
 
 export default Propiedades;
 
-
 export const loaderPropiedades = async ({ request }) => {
   const API = `http://localhost:3000/api/propiedades`;
 
@@ -254,24 +251,24 @@ export const loaderPropiedades = async ({ request }) => {
   const email = user?.usuario?.email;
 
   if (!idUsuario || !token) {
-    throw new Error("No hay usuario autenticado");
+    return redirect("/");
   }
 
   const url = new URL(request.url);
   const query = url.searchParams.get("search");
 
   const headers = {
-    "Authorization": `Bearer ${token}`,
+    Authorization: `Bearer ${token}`,
   };
 
-  // 👇 NUEVA PARTE — comprobamos el email
+
   let res1;
   if (email === "alexis@gmail.com") {
     // SUPER ADMIN
-    res1 = await fetch(`${API}/getPropiedades`, { headers });
+    res1 = await fetch(`${import.meta.env.VITE_API_URL}/propiedades/getPropiedades`, { headers });
   } else {
     // USUARIO NORMAL
-    res1 = await fetch(`${API}/getPropiedadesByUsuario/${idUsuario}`, {
+    res1 = await fetch(`${import.meta.env.VITE_API_URL}/propiedades/getPropiedadesByUsuario/${idUsuario}`, {
       headers,
     });
   }
@@ -281,7 +278,7 @@ export const loaderPropiedades = async ({ request }) => {
   let resultadoBusqueda = null;
 
   if (query) {
-    const res2 = await fetch(`${API}/getPropiedad?q=${query}`, {
+    const res2 = await fetch(`${import.meta.env.VITE_API_URL}/propiedades/getPropiedad?q=${query}`, {
       headers,
     });
     const data2 = await res2.json();
@@ -293,6 +290,5 @@ export const loaderPropiedades = async ({ request }) => {
     buscado: resultadoBusqueda || null,
   };
 };
-
 
 

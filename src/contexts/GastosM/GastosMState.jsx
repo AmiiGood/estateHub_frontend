@@ -34,7 +34,7 @@ const GastosMState = (gastss) => {
             }
 
             const res = await axios.post(
-                "http://localhost:3000/api/gastosMantenimiento/postGastosMantenimiento",
+                `${import.meta.env.VITE_API_URL}/gastosMantenimiento/postGastosMantenimiento`,
                 { gastosMantenimiento: gastoData },
                 {
                     headers: {
@@ -69,7 +69,7 @@ const GastosMState = (gastss) => {
             }
 
             const res = await axios.get(
-                `http://localhost:3000/api/gastosMantenimiento/getGastoMantenimiento/${idGasto}`,
+                `${import.meta.env.VITE_API_URL}/gastosMantenimiento/getGastoMantenimiento/${idGasto}`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -104,7 +104,7 @@ const GastosMState = (gastss) => {
             }
 
             const res = await axios.put(
-                'http://localhost:3000/api/gastosMantenimiento/putGastosMantenimiento',
+                `${import.meta.env.VITE_API_URL}/gastosMantenimiento/putGastosMantenimiento`,
                 { gastoMantenimiento: gastoData },
                 {
                     headers: {
@@ -137,7 +137,7 @@ const GastosMState = (gastss) => {
                 console.error("No existe token en localStorage");
                 throw new Error("No autorizado");
             }
-            const res = await axios.delete('http://localhost:3000/api/gastosMantenimiento/deleteGastoMantenimiento/' + id,
+            const res = await axios.delete(`${import.meta.env.VITE_API_URL}/gastosMantenimiento/deleteGastoMantenimiento/` + id,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,

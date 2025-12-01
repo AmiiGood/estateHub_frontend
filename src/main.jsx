@@ -8,17 +8,26 @@ import { RouterProvider } from 'react-router-dom'
 import PropState from './contexts/Propiedad/PropState'
 import UsuarioState from './contexts/Usuario/UsuarioState'
 import GastosMState from './contexts/GastosM/GastosMState'
+import PerState from "./contexts/Perfil/PerState";
+import ContState from "./contexts/Contrato/ContState";
+import PagState from "./contexts/Pago/PagState";
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <AuthProvider>
       <PropState>
-        <UsuarioState>
-          <GastosMState>
-            <RouterProvider router={router} />
-          </GastosMState>
-        </UsuarioState>
+        <ContState>
+          <PagState>
+            <PerState>
+              <UsuarioState>
+                <GastosMState>
+                  <RouterProvider router={router} />
+                </GastosMState>
+              </UsuarioState>
+            </PerState>
+          </PagState>
+        </ContState>
       </PropState>
     </AuthProvider>
-  </StrictMode>,
-)
+  </StrictMode>
+);

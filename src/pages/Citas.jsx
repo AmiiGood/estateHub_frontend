@@ -1,4 +1,4 @@
-import { Link, useLoaderData } from "react-router-dom";
+import { Link, redirect, useLoaderData } from "react-router-dom";
 import { useState } from "react";
 
 const Citas = () => {
@@ -227,7 +227,7 @@ export const loaderCitas = async () => {
   const token = user?.token;
 
   if (!idUsuario || !token) {
-    throw new Error("No hay usuario autenticado");
+    return redirect("/");
   }
 
   const headers = {
@@ -235,8 +235,8 @@ export const loaderCitas = async () => {
   };
 
   const [resCreadas, resResponsable] = await Promise.all([
-    fetch(`${API}/getCitasByUsuario/${idUsuario}`, { headers }),
-    fetch(`${API}/getCitasByResponsable/${idUsuario}`, { headers })
+    fetch(`${import.meta.env.VITE_API_URL}/citas/getCitasByUsuario/${idUsuario}`, { headers }),
+    fetch(`${import.meta.env.VITE_API_URL}/citas/getCitasByResponsable/${idUsuario}`, { headers })
   ]);
 
   const dataCreadas = await resCreadas.json();

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Link, useLoaderData, useNavigate } from "react-router-dom";
+import { Link, redirect, useLoaderData, useNavigate } from "react-router-dom";
 
 
 const Home = () => {
@@ -196,7 +196,7 @@ export const loaderPropiedades = async ({ request }) => {
   const token = user?.token;
 
   if (!idUsuario || !token) {
-    throw new Error("No hay usuario autenticado");
+    return redirect("/");
   }
 
   const url = new URL(request.url);
@@ -207,7 +207,7 @@ export const loaderPropiedades = async ({ request }) => {
   };
 
 
-  const res1 = await fetch(`${API}/getPropiedadesByUsuario/${idUsuario}`, {
+  const res1 = await fetch(`${import.meta.env.VITE_API_URL}/propiedades/getPropiedadesByUsuario/${idUsuario}`, {
     headers,
   });
   const data1 = await res1.json();

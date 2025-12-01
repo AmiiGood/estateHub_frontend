@@ -320,7 +320,7 @@ const FormProp = () => {
       });
 
       const response = await fetch(
-        `http://localhost:3000/api/propiedades/subirFotos/${propiedadId}`,
+        `${import.meta.env.VITE_API_URL}/propiedades/subirFotos/${propiedadId}`,
         {
           method: "POST",
           headers: {

@@ -1,6 +1,6 @@
 import Mapa from "../components/Mapa";
 import React from "react";
-import { useLoaderData, Link } from "react-router-dom";
+import { useLoaderData, Link, redirect } from "react-router-dom";
 
 const Propiedad = () => {
   const { propiedad } = useLoaderData();
@@ -33,10 +33,13 @@ const Propiedad = () => {
         </div>
         <Link
           to={`/propiedades/${propiedad.idPropiedad}/gastos/crear`}
-          className="inline-block mb-6 ml-4 px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition"
+          className="px-6 py-3 rounded-xl bg-[#1F2A37] text-sm font-semibold uppercase tracking-wide shadow-lg hover:bg-[#273445] transition-all duration-200 border border-white/10"
         >
           Agregar gasto de mantenimiento
         </Link>
+        <br></br>
+        <br></br>
+        <br></br>
 
 
         {/* Información general */}
@@ -120,14 +123,14 @@ export const loaderPropiedad = async ({ params, request }) => {
   const token = user?.token;
 
   if (!token) {
-    throw new Error("No hay usuario autenticado");
+    return redirect("/");
   }
 
   const headers = {
     "Authorization": `Bearer ${token}`,
   };
 
-  const res = await fetch(`${API}/getPropiedad/${params.id}`, { headers });
+  const res = await fetch(`${import.meta.env.VITE_API_URL}/propiedades/getPropiedad/${params.id}`, { headers });
   const data = await res.json();
 
   return { propiedad: data.data };

@@ -287,7 +287,7 @@ export const loaderGastos = async () => {
     const token = user?.token;
 
     if (!idUsuario || !token) {
-        throw new Error("No hay usuario autenticado");
+        return redirect("/");
     }
 
     const headers = {
@@ -296,7 +296,7 @@ export const loaderGastos = async () => {
 
     // Obtener TODOS los gastos
     const resGastos = await fetch(
-        "http://localhost:3000/api/gastosMantenimiento/getGastosMantenimiento",
+        `${import.meta.env.VITE_API_URL}/gastosMantenimiento/getGastosMantenimiento`,
         { headers }
     );
 
@@ -310,7 +310,7 @@ export const loaderGastos = async () => {
 
     // Obtener PROPIEDADES del usuario
     const resProps = await fetch(
-        `http://localhost:3000/api/propiedades/getPropiedadesByUsuario/${idUsuario}`,
+        `${import.meta.env.VITE_API_URL}/propiedades/getPropiedadesByUsuario/${idUsuario}`,
         { headers }
     );
 

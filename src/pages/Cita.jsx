@@ -1,6 +1,6 @@
 import { CalendarDays, Clock, Home, ArrowLeft } from 'lucide-react';
 import React from "react";
-import { Link, useLoaderData } from "react-router-dom";
+import { Link, redirect, useLoaderData } from "react-router-dom";
 
 const Cita = () => {
     const { cita } = useLoaderData();
@@ -137,14 +137,14 @@ export const loaderCita = async ({ params, request }) => {
     const token = user?.token;
 
     if (!token) {
-        throw new Error("No hay usuario autenticado");
+        return redirect("/");
     }
 
     const headers = {
         "Authorization": `Bearer ${token}`,
     };
 
-    const res = await fetch(`${API}/getCita/${params.id}`, { headers });
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/citas/getCita/${params.id}`, { headers });
     const data = await res.json();
 
     return { cita: data.data };

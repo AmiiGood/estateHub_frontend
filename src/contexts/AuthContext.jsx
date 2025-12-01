@@ -23,7 +23,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:3000/api/login/', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/login/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -33,10 +33,10 @@ export const AuthProvider = ({ children }) => {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Error en el inicio de sesión');
       }
-      
+
       const userData = await response.json();
       console.log("Datos del usuario recibidos en login:", userData);
-      
+
       setUser(userData);
       localStorage.setItem('user', JSON.stringify(userData));
       return { success: true };
@@ -51,7 +51,7 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:3000/api/usuarios/postUsuario', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/usuarios/postUsuario`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ usuario: userData }),
@@ -61,10 +61,10 @@ export const AuthProvider = ({ children }) => {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Error al registrarse');
       }
-      
+
       const result = await response.json();
       console.log("Respuesta del registro:", result);
-      
+
       // Después del registro, redirigir al login
       return { success: true, message: result.message };
     } catch (error) {
@@ -80,7 +80,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('user');
   };
 
-  const isAuthenticated =() =>{
+  const isAuthenticated = () => {
     return localStorage.getItem('user') !== null;
   }
 
@@ -90,12 +90,12 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      login, 
-      register, 
+    <AuthContext.Provider value={{
+      user,
+      login,
+      register,
       logout,
-      isAuthenticated, 
+      isAuthenticated,
       loading,
       getIdUsuario
     }}>

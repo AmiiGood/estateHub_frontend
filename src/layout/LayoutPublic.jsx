@@ -1,9 +1,8 @@
 import { Outlet, useLocation } from "react-router-dom";
-import Navbar from '../components/Navbar';
+import Navbar from "../components/Navbar";
 import estateHubLogo from "../assets/estateHubLogoFullWhite.png";
 
 const LayoutPublic = () => {
-
   const location = useLocation();
   const hideNavbarRoutes = ["/", "/register"];
 
