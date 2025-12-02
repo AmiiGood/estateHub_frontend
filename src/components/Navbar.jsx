@@ -27,11 +27,13 @@ const Navbar = () => {
   // Cerrar dropdowns al hacer clic fuera
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (profileRef.current && !profileRef.current.contains(event.target)) {
-        setProfileDropdownOpen(false);
-      }
-      if (adminRef.current && !adminRef.current.contains(event.target)) {
-        setAdminDropdownOpen(false);
+      if (!isOpen) {  // solo en desktop
+        if (profileRef.current && !profileRef.current.contains(event.target)) {
+          setProfileDropdownOpen(false);
+        }
+        if (adminRef.current && !adminRef.current.contains(event.target)) {
+          setAdminDropdownOpen(false);
+        }
       }
     };
 
@@ -39,7 +41,8 @@ const Navbar = () => {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, []);
+  }, [isOpen]);
+
 
   // Cerrar todos los dropdowns al cambiar de ruta
   useEffect(() => {
