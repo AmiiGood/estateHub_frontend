@@ -167,7 +167,6 @@ const GastosMantenimiento = () => {
                     <table className="w-full text-sm text-left text-white">
                         <thead className="bg-white/10 text-white uppercase text-xs tracking-wide border-b border-white/10">
                             <tr>
-                                <th className="px-6 py-4">ID</th>
                                 <th className="px-6 py-4">Categoría</th>
                                 <th className="px-6 py-4">Concepto</th>
                                 <th className="px-6 py-4">Monto</th>
@@ -185,7 +184,6 @@ const GastosMantenimiento = () => {
                                         className={`border-b border-white/10 hover:bg-white/5 transition ${index % 2 === 0 ? "bg-white/5" : "bg-white/[0.02]"
                                             }`}
                                     >
-                                        <td className="px-6 py-4 font-medium">{gasto.idGasto}</td>
                                         <td className="px-6 py-4">
                                             <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/20 text-blue-300 border border-blue-500/30">
                                                 {gasto.categoria}
